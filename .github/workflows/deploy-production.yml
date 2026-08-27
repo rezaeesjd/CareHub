@@ -8,11 +8,11 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with: { ref: main }
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
+      - uses: actions/setup-node@v5
+        with: { node-version: 24 }
+      - run: npm install --no-audit --no-fund
       - run: npm run build && npm run verify:dist
         env: { PUBLIC_SITE_URL: '${{ vars.PUBLIC_SITE_URL }}', PUBLIC_GA_ID: '${{ vars.PUBLIC_GA_ID }}', PUBLIC_GTM_ID: '${{ vars.PUBLIC_GTM_ID }}' }
       - name: Validate deployment destination

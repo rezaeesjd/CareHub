@@ -9,6 +9,8 @@ npm run dev
 ```
 Copy `.env.example` to `.env` and set `PUBLIC_SITE_URL` for canonical URLs and sitemap generation. Phone, WhatsApp, email, analytics IDs, service area, social URLs and provider wording are centralized in `src/config/site.ts`.
 
+CI currently installs directly from `package.json`. Do not enable the `setup-node` npm cache until a generated `package-lock.json` is committed, because that cache requires a supported dependency lockfile.
+
 ## Production build and testing
 ```bash
 npm run check

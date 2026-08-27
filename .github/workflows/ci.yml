@@ -6,10 +6,13 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 24 }
+      # This repository currently has no generated dependency lockfile. Do not
+      # enable setup-node's npm cache until a lockfile is committed: the action
+      # intentionally fails when cache metadata has no lockfile to key from.
+      - run: npm install --no-audit --no-fund
       - run: npm run check
       - run: npm run lint
       - run: npm test
