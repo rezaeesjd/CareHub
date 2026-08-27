@@ -1,0 +1,27 @@
+name: Deploy production
+on:
+  workflow_run: { workflows: [CI], types: [completed], branches: [main] }
+  workflow_dispatch:
+concurrency: { group: production, cancel-in-progress: false }
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build && npm run verify:dist
+        env: { PUBLIC_SITE_URL: '${{ vars.PUBLIC_SITE_URL }}', PUBLIC_GA_ID: '${{ vars.PUBLIC_GA_ID }}', PUBLIC_GTM_ID: '${{ vars.PUBLIC_GTM_ID }}' }
+      - name: Validate deployment destination
+        env: { HOSTING_REMOTE_PATH: '${{ secrets.HOSTING_REMOTE_PATH }}' }
+        run: case "$HOSTING_REMOTE_PATH" in ''|'/'|'.'|'..'|'/home'|'/var'|'/var/www') echo 'Unsafe remote path' >&2; exit 2;; esac
+      - name: Configure SSH
+        env: { SSH_KEY: '${{ secrets.HOSTING_SSH_KEY }}', HOST: '${{ secrets.HOSTING_HOST }}', PORT: '${{ secrets.HOSTING_PORT }}' }
+        run: mkdir -p ~/.ssh; printf '%s' "$SSH_KEY" > ~/.ssh/id_ed25519; chmod 600 ~/.ssh/id_ed25519; ssh-keyscan -p "${PORT:-22}" "$HOST" >> ~/.ssh/known_hosts
+      - name: Deploy dist with rsync
+        env: { HOSTING_HOST: '${{ secrets.HOSTING_HOST }}', HOSTING_PORT: '${{ secrets.HOSTING_PORT }}', HOSTING_USERNAME: '${{ secrets.HOSTING_USERNAME }}', HOSTING_REMOTE_PATH: '${{ secrets.HOSTING_REMOTE_PATH }}' }
+        run: npm run deploy
+      - run: echo "### Deployment complete" >> "$GITHUB_STEP_SUMMARY"

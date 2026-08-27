@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import ContactButtons from '../../components/ContactButtons.astro';
+const lang='it' as const;
+---
+<BaseLayout {lang} title="Cookie policy — bozza" description="Cookie policy — bozza" alternate="/en/cookies/"><section class="page-hero"><div class="shell"><p class="eyebrow">Pending professional review</p><h1>Cookie policy — bozza</h1></div></section><section class="section"><div class="shell prose"><p class="legal-note"><strong>Draft placeholder:</strong> This page is not lawyer-approved and must be reviewed before production launch.</p><h2>Current draft</h2><p>Lo storage strettamente necessario conserva lingua e attribuzione non clinica. Gli analytics opzionali non vengono caricati senza consenso esplicito. Il testo richiede revisione privacy italiana prima del lancio.</p><ContactButtons {lang}/></div></section></BaseLayout>

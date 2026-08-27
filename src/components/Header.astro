@@ -1,0 +1,10 @@
+---
+import {t,paths,type Lang} from '../i18n/content'; import ContactButtons from './ContactButtons.astro';
+interface Props{lang:Lang;alternate:string} const {lang,alternate}=Astro.props; const x=t[lang],p=paths[lang];
+---
+<header class="site-header"><a class="skip" href="#main">Skip to content</a><div class="shell nav-wrap">
+ <a class="brand" href={p.home} aria-label="Florence Care 24 home"><span class="brand-mark">F<span>+</span></span><span>Florence Care <b>24</b><small>Healthcare Assistance & Coordination</small></span></a>
+ <button class="menu-button" aria-expanded="false" aria-controls="nav">Menu</button>
+ <nav id="nav" aria-label="Main navigation"><a href={`${p.home}#services`}>{x.services}</a><a href={`${p.home}#how`}>{x.how}</a><a href={p.tourist}>{x.tourists}</a><a href={p.about}>{x.about}</a><a href={p.partners}>{x.partners}</a><a href={p.faq}>{x.faq}</a><a href={p.contact}>{x.contact}</a></nav>
+ <a class="language" href={alternate} data-event="language_change" hreflang={lang==='en'?'it':'en'}>{lang==='en'?'IT':'EN'}</a><ContactButtons {lang} compact />
+</div></header>

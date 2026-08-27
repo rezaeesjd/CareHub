@@ -1,0 +1,8 @@
+---
+import {t,type Lang} from '../i18n/content'; import {site} from '../config/site'; import {whatsappUrl,phoneUrl} from '../lib/links';
+interface Props{lang:Lang;compact?:boolean} const {lang,compact=false}=Astro.props;
+---
+<div class:list={['contact-buttons',compact&&'compact']}>
+ <a class="button whatsapp" data-channel="whatsapp" data-base-href={whatsappUrl(lang)} href={whatsappUrl(lang)} target="_blank" rel="noopener noreferrer">{t[lang].waUs}</a>
+ <a class="button call" data-channel="phone" href={phoneUrl()}>{compact?t[lang].call:`${t[lang].call} ${site.phoneDisplay}`}</a>
+</div>

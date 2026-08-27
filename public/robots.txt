@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# Sitemap is generated when PUBLIC_SITE_URL is configured at build time.
