@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import ContactButtons from '../../components/ContactButtons.astro';
+const lang='it' as const;
+---
+<BaseLayout {lang} title="Termini di servizio — bozza" description="Termini di servizio — bozza" alternate="/en/terms/"><section class="page-hero"><div class="shell"><p class="eyebrow">Pending professional review</p><h1>Termini di servizio — bozza</h1></div></section><section class="section"><div class="shell prose"><p class="legal-note"><strong>Draft placeholder:</strong> This page is not lawyer-approved and must be reviewed before production launch.</p><h2>Current draft</h2><p>Florence Care 24 coordina le richieste. Termini, tariffe, responsabilità e condizioni di cancellazione richiedono revisione legale e conferma prima della pubblicazione.</p><ContactButtons {lang}/></div></section></BaseLayout>

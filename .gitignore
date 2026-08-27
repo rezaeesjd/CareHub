@@ -82,6 +82,10 @@ out
 .nuxt
 dist
 .output
+host-backups/
+data/partners.internal.json
+*.pem
+*.key
 
 # Gatsby files
 .cache/

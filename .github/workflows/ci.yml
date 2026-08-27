@@ -1,0 +1,22 @@
+name: CI
+on:
+  push: { branches: [main, develop] }
+  pull_request:
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 24 }
+      # This repository currently has no generated dependency lockfile. Do not
+      # enable setup-node's npm cache until a lockfile is committed: the action
+      # intentionally fails when cache metadata has no lockfile to key from.
+      - run: npm install --no-audit --no-fund
+      - run: npm run check
+      - run: npm run lint
+      - run: npm test
+      - run: bash tests/deploy-safety.sh
+      - run: npm run build
+        env: { PUBLIC_SITE_URL: 'https://ci.invalid' }
+      - run: npm run verify:dist

@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import ContactButtons from '../../components/ContactButtons.astro';
+const lang='en' as const;
+---
+<BaseLayout {lang} title="Accessibility statement — draft" description="Accessibility statement — draft" alternate="/it/accessibilita/"><section class="page-hero"><div class="shell"><p class="eyebrow">Pending professional review</p><h1>Accessibility statement — draft</h1></div></section><section class="section"><div class="shell prose"><p class="legal-note"><strong>Draft placeholder:</strong> This page is not lawyer-approved and must be reviewed before production launch.</p><h2>Current draft</h2><p>We aim to follow WCAG 2.1 AA principles with keyboard navigation, clear focus, readable contrast and large contact targets. Please report barriers by phone or email.</p><ContactButtons {lang}/></div></section></BaseLayout>

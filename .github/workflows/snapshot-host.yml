@@ -1,0 +1,23 @@
+name: Snapshot production host
+on: { workflow_dispatch: {} }
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate destination and configure SSH
+        env: { SSH_KEY: '${{ secrets.HOSTING_SSH_KEY }}', HOST: '${{ secrets.HOSTING_HOST }}', PORT: '${{ secrets.HOSTING_PORT }}', REMOTE: '${{ secrets.HOSTING_REMOTE_PATH }}' }
+        run: |
+          normalized="$REMOTE"
+          while [[ "$normalized" == */ && "$normalized" != "/" ]]; do normalized="${normalized%/}"; done
+          case "$normalized" in ''|'/'|'.'|'..'|'/home'|'/var'|'/var/www') exit 2;; esac
+          case "$normalized/" in *'/../'*|*'/./'*|*'//'*) exit 2;; esac
+          case "$normalized" in /*) ;; *) exit 2;; esac
+          mkdir -p ~/.ssh; printf '%s' "$SSH_KEY" > ~/.ssh/id_ed25519; chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${PORT:-22}" "$HOST" >> ~/.ssh/known_hosts
+      - name: Download generated production files
+        env: { HOSTING_HOST: '${{ secrets.HOSTING_HOST }}', HOSTING_PORT: '${{ secrets.HOSTING_PORT }}', HOSTING_USERNAME: '${{ secrets.HOSTING_USERNAME }}', HOSTING_REMOTE_PATH: '${{ secrets.HOSTING_REMOTE_PATH }}' }
+        run: npm run host:backup; diff -qr dist host-backups 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with: { name: 'host-snapshot-${{ github.run_id }}', path: host-backups, retention-days: 30 }
+      - run: echo '### Host snapshot saved as an artifact. Generated host files cannot reconstruct source and are never merged automatically.' >> "$GITHUB_STEP_SUMMARY"

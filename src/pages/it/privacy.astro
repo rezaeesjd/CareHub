@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import ContactButtons from '../../components/ContactButtons.astro';
+const lang='it' as const;
+---
+<BaseLayout {lang} title="Informativa privacy — bozza" description="Informativa privacy — bozza" alternate="/en/privacy/"><section class="page-hero"><div class="shell"><p class="eyebrow">Pending professional review</p><h1>Informativa privacy — bozza</h1></div></section><section class="section"><div class="shell prose"><p class="legal-note"><strong>Draft placeholder:</strong> This page is not lawyer-approved and must be reviewed before production launch.</p><h2>Current draft</h2><p>Questa bozza descrive un sito che minimizza i dati. I recapiti inviati volontariamente sono usati solo per rispondere. Non inviare dati sanitari tramite moduli web. Gli analytics, se attivati previo consenso, non devono contenere nomi, recapiti o informazioni mediche.</p><ContactButtons {lang}/></div></section></BaseLayout>
