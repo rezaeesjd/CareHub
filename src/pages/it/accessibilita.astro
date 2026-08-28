@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import ContactButtons from '../../components/ContactButtons.astro';
+const lang='it' as const;
+---
+<BaseLayout {lang} title="Dichiarazione di accessibilità — bozza" description="Dichiarazione di accessibilità — bozza" alternate="/en/accessibility/"><section class="page-hero"><div class="shell"><p class="eyebrow">Pending professional review</p><h1>Dichiarazione di accessibilità — bozza</h1></div></section><section class="section"><div class="shell prose"><p class="legal-note"><strong>Draft placeholder:</strong> This page is not lawyer-approved and must be reviewed before production launch.</p><h2>Current draft</h2><p>Puntiamo a seguire i principi WCAG 2.1 AA con navigazione da tastiera, focus visibile, contrasto leggibile e ampie aree di contatto. Segnala eventuali barriere per telefono o email.</p><ContactButtons {lang}/></div></section></BaseLayout>

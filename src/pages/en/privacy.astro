@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import ContactButtons from '../../components/ContactButtons.astro';
+const lang='en' as const;
+---
+<BaseLayout {lang} title="Privacy policy — draft" description="Privacy policy — draft" alternate="/it/privacy/"><section class="page-hero"><div class="shell"><p class="eyebrow">Pending professional review</p><h1>Privacy policy — draft</h1></div></section><section class="section"><div class="shell prose"><p class="legal-note"><strong>Draft placeholder:</strong> This page is not lawyer-approved and must be reviewed before production launch.</p><h2>Current draft</h2><p>This draft describes a data-minimizing website. Contact details sent voluntarily are used only to respond. Do not submit health data through website forms. Analytics, if enabled after consent, must not contain names, contact details or medical information.</p><ContactButtons {lang}/></div></section></BaseLayout>

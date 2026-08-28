@@ -1,0 +1,94 @@
+---
+import Header from '../components/Header.astro'; import Footer from '../components/Footer.astro'; import ContactButtons from '../components/ContactButtons.astro'; import {site} from '../config/site'; import {paths,type Lang} from '../i18n/content'; import {canonical} from '../lib/links'; import '../styles/global.css';
+interface Props{lang:Lang;title:string;description:string;alternate:string;schema?:Record<string,unknown>|Record<string,unknown>[]} const {lang,title,description,alternate,schema}=Astro.props; const current=Astro.url.pathname; const url=canonical(current); const altLang=lang==='en'?'it':'en';
+const defaultSchema={'@context':'https://schema.org','@type':'Organization',name:site.name,url:site.url||undefined,telephone:site.phone,email:site.email,areaServed:{'@type':'City',name:'Florence'},availableLanguage:['English','Italian'],sameAs:site.socials};
+---
+<!doctype html><html lang={lang}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><meta name="description" content={description}><meta name="theme-color" content="#075985"><title>{title} | Florence Care 24</title><link rel="canonical" href={url}><link rel="alternate" hreflang={lang} href={url}><link rel="alternate" hreflang={altLang} href={canonical(alternate)}><link rel="alternate" hreflang="x-default" href={canonical(paths.en.home)}><meta property="og:type" content="website"><meta property="og:title" content={`${title} | Florence Care 24`}><meta property="og:description" content={description}><meta property="og:url" content={url}><meta property="og:site_name" content="Florence Care 24"><meta name="twitter:card" content="summary"><meta name="twitter:title" content={`${title} | Florence Care 24`}><meta name="twitter:description" content={description}><link rel="icon" href="/favicon.svg"><script type="application/ld+json" set:html={JSON.stringify([defaultSchema,...(Array.isArray(schema)?schema:schema?[schema]:[])])} /></head><body data-lang={lang}>
+<Header {lang} {alternate}/><main id="main"><slot/></main><Footer {lang}/><aside class="mobile-bar" aria-label="Contact"><ContactButtons {lang} compact /></aside>
+<script is:inline define:vars={{gaId:site.gaId,gtmId:site.gtmId}}>
+(() => {
+  const attributionKey = 'fc24_attribution';
+  const params = new URLSearchParams(location.search);
+  const clean = (value, max = 100) => value?.replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, max) || undefined;
+  const storage = {
+    get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+    set(key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } },
+    sessionGet(key) { try { return sessionStorage.getItem(key); } catch { return null; } },
+    sessionSet(key, value) { try { sessionStorage.setItem(key, value); return true; } catch { return false; } },
+  };
+
+  storage.set('fc24_language', document.body.dataset.lang || 'en');
+  const current = {
+    ref: clean(params.get('ref'), 24),
+    landingPage: location.pathname,
+    timestamp: new Date().toISOString(),
+    utmSource: clean(params.get('utm_source')),
+    utmMedium: clean(params.get('utm_medium')),
+    utmCampaign: clean(params.get('utm_campaign')),
+    utmContent: clean(params.get('utm_content')),
+    gclid: clean(params.get('gclid'), 150),
+  };
+  const hasSignal = Boolean(current.ref || current.utmSource || current.utmMedium || current.utmCampaign || current.utmContent || current.gclid);
+  if (!storage.get(attributionKey) && hasSignal) storage.set(attributionKey, JSON.stringify(current));
+
+  let attribution = {};
+  try { attribution = JSON.parse(storage.get(attributionKey) || '{}'); } catch { attribution = {}; }
+  const consentGranted = storage.get('fc24_analytics_consent') === 'granted';
+  window.dataLayer = window.dataLayer || [];
+
+  if (consentGranted && gtmId) {
+    window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
+    document.head.appendChild(script);
+  } else if (consentGranted && gaId) {
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', gaId, { anonymize_ip: true });
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
+    document.head.appendChild(script);
+  }
+
+  const track = (event, extra = {}) => {
+    const payload = {
+      page: location.pathname,
+      language: document.body.dataset.lang,
+      referral_code: attribution.ref,
+      utm_campaign: attribution.utmCampaign,
+      ...extra,
+    };
+    if (gtmId && consentGranted) window.dataLayer.push({ event, ...payload });
+    else if (gaId && consentGranted && typeof window.gtag === 'function') window.gtag('event', event, payload);
+  };
+
+  document.querySelectorAll('[data-channel]').forEach((element) => element.addEventListener('click', () => {
+    const channel = element.dataset.channel;
+    if (channel === 'whatsapp' && attribution.ref) {
+      const url = new URL(element.dataset.baseHref || element.href);
+      url.searchParams.set('text', `${url.searchParams.get('text') || ''}\nReferral: ${attribution.ref}`);
+      element.href = url.toString();
+    }
+    track(`click_${channel}`);
+  }));
+  document.querySelectorAll('[data-event]').forEach((element) => element.addEventListener('click', () => track(element.dataset.event)));
+
+  const menuButton = document.querySelector('.menu-button');
+  const navigation = document.querySelector('#nav');
+  menuButton?.addEventListener('click', () => {
+    const open = menuButton.getAttribute('aria-expanded') === 'true';
+    menuButton.setAttribute('aria-expanded', String(!open));
+    navigation?.classList.toggle('open', !open);
+  });
+
+  if (current.ref) {
+    const marker = `fc24_partner_visit_${current.ref}`;
+    if (!storage.sessionGet(marker)) {
+      track('partner_referral_visit', { referral_code: current.ref });
+      storage.sessionSet(marker, '1');
+    }
+  }
+})();
+</script></body></html>
