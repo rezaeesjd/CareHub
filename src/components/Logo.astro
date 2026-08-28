@@ -1,0 +1,96 @@
+---
+/**
+ * Brand logo lockup: an SVG emblem (heart + medical cross + Duomo dome, echoing
+ * the printed flyer) plus an HTML wordmark that uses the site font (crisp,
+ * selectable, accessible). Not a copy of any raster asset.
+ */
+import { brand } from '../config/site';
+import type { Lang } from '../config/site';
+
+interface Props {
+  lang: Lang;
+  variant?: 'header' | 'footer';
+  showTagline?: boolean;
+}
+const { lang, variant = 'header', showTagline = true } = Astro.props;
+const home = `/${lang}/`;
+const tagline = brand.tagline[lang];
+---
+
+<a class:list={['logo', `logo--${variant}`]} href={home} aria-label={`${brand.name} — home`}>
+  <span class="logo__mark" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="42" height="42">
+      <!-- heart -->
+      <path
+        d="M24 42S6 30.5 6 18.2C6 12 10.6 8 15.8 8c3.4 0 6.4 1.8 8.2 4.6C25.8 9.8 28.8 8 32.2 8 37.4 8 42 12 42 18.2 42 30.5 24 42 24 42Z"
+        fill="#1b3a6b"></path>
+      <!-- Duomo dome hint -->
+      <path d="M24 12.5c2.1 0 3.6 1.9 3.6 4.2H20.4c0-2.3 1.5-4.2 3.6-4.2Z" fill="#d62828"></path>
+      <!-- medical cross -->
+      <path d="M22 20h4v3.5h3.5v4H26V31h-4v-3.5h-3.5v-4H22V20Z" fill="#ffffff"></path>
+    </svg>
+  </span>
+  <span class="logo__word">
+    <span class="logo__name">Florence <span class="c">Care</span> <span class="n">24</span></span>
+    {showTagline && <span class="logo__tag">{tagline}</span>}
+  </span>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .logo__mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+  }
+  .logo__word {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .logo__name {
+    font-weight: 800;
+    font-size: 1.28rem;
+    letter-spacing: -0.01em;
+    color: var(--navy);
+  }
+  .logo__name .c {
+    color: var(--red);
+  }
+  .logo__name .n {
+    color: var(--red);
+  }
+  .logo__tag {
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  /* Footer variant: white text on navy */
+  .logo--footer .logo__name {
+    color: #fff;
+  }
+  .logo--footer .logo__name .c,
+  .logo--footer .logo__name .n {
+    color: #ff8a8a;
+  }
+  .logo--footer .logo__tag {
+    color: #b7c6de;
+  }
+  @media (max-width: 380px) {
+    .logo__name {
+      font-size: 1.15rem;
+    }
+    .logo__tag {
+      display: none;
+    }
+  }
+</style>

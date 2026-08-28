@@ -1,0 +1,85 @@
+---
+/**
+ * EN | IT switcher. Links to the SAME page in the other language using the
+ * central route table, so switching never dumps the visitor on the homepage.
+ * Choice is persisted (localStorage) and fires a language_change event.
+ */
+import type { Lang } from '../config/site';
+import { alternates } from '../config/routes';
+import { useTranslations } from '../i18n';
+import type { RouteKey } from '../config/routes';
+
+interface Props {
+  lang: Lang;
+  routeKey: RouteKey;
+  class?: string;
+}
+const { lang, routeKey, class: className } = Astro.props;
+const t = useTranslations(lang);
+const alts = alternates(routeKey);
+const codeLabel: Record<Lang, string> = { en: 'EN', it: 'IT' };
+---
+
+<nav class:list={['lang', className]} aria-label={t.langSwitchLabel}>
+  {
+    alts.map(({ lang: l, path }) => (
+      <a
+        href={path}
+        hreflang={l}
+        lang={l}
+        class:list={['lang__link', { 'is-current': l === lang }]}
+        aria-current={l === lang ? 'true' : undefined}
+        data-lang-choice={l}
+      >
+        {codeLabel[l as Lang]}
+      </a>
+    ))
+  }
+</nav>
+
+<script>
+  // Persist language preference and signal an analytics event.
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-lang-choice]');
+  links.forEach((a) => {
+    a.addEventListener('click', () => {
+      const choice = a.dataset.langChoice;
+      try {
+        if (choice) window.localStorage.setItem('fc24_lang', choice);
+      } catch {
+        /* storage disabled — ignore */
+      }
+      // analytics.ts consumer picks up window.gtag if present
+      const w = window as unknown as { gtag?: (...a: unknown[]) => void };
+      if (typeof w.gtag === 'function') {
+        w.gtag('event', 'language_change', { language: choice, page: location.pathname });
+      }
+    });
+  });
+</script>
+
+<style>
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .lang__link {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-decoration: none;
+    line-height: 1;
+  }
+  .lang__link.is-current {
+    background: var(--navy);
+    color: #fff;
+  }
+  .lang__link:not(.is-current):hover {
+    background: var(--navy-50);
+    color: var(--navy);
+  }
+</style>

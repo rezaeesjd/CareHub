@@ -1,0 +1,50 @@
+---
+/**
+ * Analytics loader. Renders NOTHING unless PUBLIC_GA_ID or PUBLIC_GTM_ID is set,
+ * so by default the site ships no tracking, no cookies and needs no cookie
+ * banner. When enabled for EU visitors, wire Google Consent Mode here (see the
+ * commented default below and docs/SEO.md / GOOGLE-ADS notes).
+ */
+import { analytics } from '../config/site';
+const { ga4Id, gtmId } = analytics;
+---
+
+{
+  ga4Id && (
+    <>
+      {/* Consent Mode default (denied) — uncomment + wire a consent UI before
+          enabling ads/analytics storage for EU visitors.
+      <script is:inline>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('consent','default',{ ad_storage:'denied', analytics_storage:'denied' });
+      </script> */}
+      <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} async />
+      <script is:inline define:vars={{ ga4Id }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', ga4Id, { anonymize_ip: true });
+      </script>
+    </>
+  )
+}
+{
+  gtmId && (
+    <script is:inline define:vars={{ gtmId }}>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', gtmId);
+    </script>
+  )
+}

@@ -1,0 +1,141 @@
+---
+/**
+ * Full service page (nursing / physiotherapy). Thin route files pass lang +
+ * clusterId. Tourist has its own richer page and does not use this template.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import CtaButtons from './CtaButtons.astro';
+import Icon from './Icon.astro';
+import FinalCta from './FinalCta.astro';
+import { useTranslations } from '../i18n';
+import { getCluster, clusters } from '../config/services';
+import { path } from '../config/routes';
+import type { RouteKey } from '../config/routes';
+import type { Lang } from '../config/site';
+import { serviceSchema, breadcrumbSchema, absoluteUrl } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  clusterId: 'nursing' | 'physio';
+}
+const { lang, clusterId } = Astro.props;
+const t = useTranslations(lang);
+const c = getCluster(clusterId)!;
+const seo = c.seo![lang];
+const routeKey = clusterId as RouteKey;
+
+const related = clusters.filter((r) => r.id !== clusterId);
+
+const crumbs = [{ name: t.breadcrumbHome, href: path('home', lang) }, { name: c.title[lang] }];
+
+const jsonLd = [
+  serviceSchema({
+    name: c.title[lang],
+    description: seo.description,
+    url: absoluteUrl(path(routeKey, lang)),
+    serviceType: c.title['en'],
+  }),
+  breadcrumbSchema([
+    { name: t.breadcrumbHome, url: absoluteUrl(path('home', lang)) },
+    { name: c.title[lang], url: absoluteUrl(path(routeKey, lang)) },
+  ]),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey={routeKey}
+  title={seo.title}
+  description={seo.description}
+  jsonLd={jsonLd}
+>
+  <PageHero eyebrow={c.note[lang]} title={c.title[lang]} lead={c.intro[lang]} crumbs={crumbs}>
+    <CtaButtons lang={lang} showCallNumber={true} />
+  </PageHero>
+
+  <section class="section">
+    <div class="container service-body">
+      <div class="service-body__main">
+        <h2>{t.servicePage.whatWeCover}</h2>
+        <ul class="checklist service-body__list">
+          {c.items[lang].map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+
+      <aside class="service-body__aside">
+        <div class="card service-aside">
+          <h3>{t.finalCta.heading}</h3>
+          <p class="note">{t.finalCta.text}</p>
+          <CtaButtons lang={lang} />
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--soft">
+    <div class="container">
+      <h2>{t.servicePage.relatedHeading}</h2>
+      <div class="grid grid--3 related">
+        {
+          related.map((r) => (
+            <a class="card related__card" href={path(r.id as RouteKey, lang)}>
+              <span class:list={['medallion', { 'medallion--red': r.accent === 'red' }]}>
+                <Icon name={r.icon} size={24} />
+              </span>
+              <h3>{r.title[lang]}</h3>
+              <p class="note">{r.note[lang]}</p>
+              <span class="related__go">
+                {t.servicePage.backToServices} <Icon name="arrow" size={16} />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <FinalCta lang={lang} />
+</BaseLayout>
+
+<style>
+  .service-body {
+    display: grid;
+    gap: 2rem;
+  }
+  .service-body__list {
+    font-size: 1.05rem;
+  }
+  .service-aside {
+    background: var(--navy-50);
+    border-color: var(--navy-100);
+  }
+  .related__card {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .related__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--navy);
+    font-weight: 700;
+    margin-top: auto;
+  }
+  .related__card:hover {
+    border-color: var(--navy-100);
+    box-shadow: var(--shadow);
+  }
+  @media (min-width: 900px) {
+    .service-body {
+      grid-template-columns: 1.7fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    .service-body__aside {
+      position: sticky;
+      top: 1.5rem;
+    }
+  }
+</style>

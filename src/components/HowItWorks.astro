@@ -1,0 +1,86 @@
+---
+/**
+ * Four-step process. Coordination language throughout ("we connect", not "we
+ * treat"). Numbered steps with a connecting line on desktop.
+ */
+import { useTranslations } from '../i18n';
+import type { Lang } from '../config/site';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="how-it-works" aria-labelledby="hiw-h">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{t.nav.howItWorks}</p>
+      <h2 id="hiw-h">{t.howItWorks.heading}</h2>
+    </div>
+
+    <ol class="steps">
+      {
+        t.howItWorks.steps.map((s, i) => (
+          <li class="steps__item">
+            <span class="steps__num" aria-hidden="true">
+              {i + 1}
+            </span>
+            <div>
+              <h3 class="steps__title">{s.title}</h3>
+              <p class="note">{s.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+    counter-reset: step;
+  }
+  .steps__item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin: 0;
+  }
+  .steps__num {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--navy);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+  .steps__title {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+  @media (min-width: 820px) {
+    .steps {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+    .steps__item {
+      flex-direction: column;
+      text-align: left;
+    }
+    .steps__item::after {
+      content: '';
+      display: none;
+    }
+  }
+</style>

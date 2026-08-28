@@ -1,0 +1,134 @@
+---
+/**
+ * Tourist / international-visitor landing page. The page that earns Google
+ * traffic — richer content, repeated CTAs, and its own FAQ with FAQPage schema.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import CtaButtons from './CtaButtons.astro';
+import Faq from './Faq.astro';
+import Icon from './Icon.astro';
+import FinalCta from './FinalCta.astro';
+import { useTranslations } from '../i18n';
+import { getCluster } from '../config/services';
+import { path } from '../config/routes';
+import type { Lang } from '../config/site';
+import { serviceSchema, faqSchema, breadcrumbSchema, absoluteUrl } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const tp = t.touristPage;
+const cluster = getCluster('tourist')!;
+
+const crumbs = [
+  { name: t.breadcrumbHome, href: path('home', lang) },
+  { name: cluster.title[lang] },
+];
+
+const jsonLd = [
+  serviceSchema({
+    name: tp.h1,
+    description: tp.metaDescription,
+    url: absoluteUrl(path('tourist', lang)),
+    serviceType: 'Medical assistance for tourists',
+  }),
+  faqSchema(tp.qa),
+  breadcrumbSchema([
+    { name: t.breadcrumbHome, url: absoluteUrl(path('home', lang)) },
+    { name: cluster.title[lang], url: absoluteUrl(path('tourist', lang)) },
+  ]),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="tourist"
+  title={tp.metaTitle}
+  description={tp.metaDescription}
+  jsonLd={jsonLd}
+>
+  <PageHero eyebrow={t.nav.tourists} title={tp.h1} lead={tp.lead} crumbs={crumbs}>
+    <CtaButtons lang={lang} size="lg" showCallNumber={true} />
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>{cluster.note[lang]}</h2>
+        <p>{cluster.intro[lang]}</p>
+      </div>
+      <ul class="grid grid--3 help-grid">
+        {
+          cluster.items[lang].map((item) => (
+            <li class="help-grid__item">
+              <span class="help-grid__check">
+                <Icon name="check" size={16} />
+              </span>
+              <span>{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--navy midcta">
+    <div class="container midcta__inner">
+      <p class="midcta__text">{t.finalCta.text}</p>
+      <CtaButtons lang={lang} onDark={true} />
+    </div>
+  </section>
+
+  <Faq items={tp.qa} heading={tp.faqHeading} id="tourist-faq-h" />
+
+  <FinalCta lang={lang} />
+</BaseLayout>
+
+<style>
+  .help-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .help-grid__item {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 1rem 1.1rem;
+    margin: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .help-grid__check {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--navy-50);
+    color: var(--navy);
+  }
+  .midcta__inner {
+    display: grid;
+    gap: 1.25rem;
+    align-items: center;
+  }
+  .midcta__text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+  }
+  @media (min-width: 860px) {
+    .midcta__inner {
+      grid-template-columns: 1.4fr auto;
+      gap: 2.5rem;
+    }
+  }
+</style>

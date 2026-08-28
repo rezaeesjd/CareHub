@@ -1,0 +1,93 @@
+---
+/**
+ * Shared legal page template (privacy / cookies / terms). All content is DRAFT
+ * pending professional review — the banner makes that explicit. The provider-
+ * model note is centralised in src/config/site.ts (providerModel).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import { useTranslations } from '../i18n';
+import { path } from '../config/routes';
+import type { RouteKey } from '../config/routes';
+import type { Lang } from '../config/site';
+import { providerModel } from '../config/site';
+import { breadcrumbSchema, absoluteUrl } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  which: 'privacy' | 'cookies' | 'terms';
+}
+const { lang, which } = Astro.props;
+const t = useTranslations(lang);
+const l = t.legal[which];
+const routeKey = which as RouteKey;
+// Reviewed: legal drafts are placeholders; keep them out of the index until final.
+const lastUpdated = '2026-08-28';
+const jsonLd = [
+  breadcrumbSchema([
+    { name: t.breadcrumbHome, url: absoluteUrl(path('home', lang)) },
+    { name: l.h1, url: absoluteUrl(path(routeKey, lang)) },
+  ]),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey={routeKey}
+  title={l.metaTitle}
+  description={l.metaDescription}
+  jsonLd={jsonLd}
+  noindex={true}
+>
+  <PageHero
+    title={l.h1}
+    crumbs={[{ name: t.breadcrumbHome, href: path('home', lang) }, { name: l.h1 }]}
+  />
+  <section class="section">
+    <div class="container narrow legal">
+      <p class="legal__banner" role="note">⚠️ {t.legal.draftBanner}</p>
+      <p class="legal__updated note">{t.legal.lastUpdatedLabel}: {lastUpdated}</p>
+
+      <p class="lead">{l.intro}</p>
+
+      {
+        l.sections.map((s) => (
+          <div class="legal__section">
+            <h2>{s.h}</h2>
+            <p>{s.p}</p>
+          </div>
+        ))
+      }
+
+      <div class="legal__section">
+        <h2>{which === 'terms' ? 'Our role' : t.footer.tagline}</h2>
+        <p>{providerModel.professionalServicesNote[lang]}</p>
+        {providerModel.legalLimitation[lang] && <p>{providerModel.legalLimitation[lang]}</p>}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal__banner {
+    background: #fff5e6;
+    border: 1px solid #f0d089;
+    color: #7a5200;
+    border-radius: var(--r);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .legal__updated {
+    margin-top: -0.25rem;
+  }
+  .legal__section {
+    margin-top: 1.75rem;
+  }
+  .legal__section h2 {
+    font-size: 1.25rem;
+  }
+  .legal__section p {
+    color: var(--muted);
+  }
+</style>

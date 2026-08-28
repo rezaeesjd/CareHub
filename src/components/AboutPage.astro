@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import FinalCta from './FinalCta.astro';
+import { useTranslations } from '../i18n';
+import { path } from '../config/routes';
+import type { Lang } from '../config/site';
+import { breadcrumbSchema, absoluteUrl } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const ap = t.aboutPage;
+const crumbs = [{ name: t.breadcrumbHome, href: path('home', lang) }, { name: t.nav.about }];
+const jsonLd = [
+  breadcrumbSchema([
+    { name: t.breadcrumbHome, url: absoluteUrl(path('home', lang)) },
+    { name: t.nav.about, url: absoluteUrl(path('about', lang)) },
+  ]),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="about"
+  title={ap.metaTitle}
+  description={ap.metaDescription}
+  jsonLd={jsonLd}
+>
+  <PageHero title={ap.h1} lead={ap.lead} crumbs={crumbs} />
+  <section class="section">
+    <div class="container narrow about-body">
+      {
+        ap.body.map((b) => (
+          <div class="about-body__block">
+            <h2>{b.h}</h2>
+            <p>{b.p}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+  <FinalCta lang={lang} />
+</BaseLayout>
+
+<style>
+  .about-body__block + .about-body__block {
+    margin-top: 2rem;
+  }
+  .about-body h2 {
+    font-size: 1.35rem;
+  }
+  .about-body p {
+    font-size: 1.08rem;
+    color: var(--muted);
+    margin: 0;
+  }
+</style>

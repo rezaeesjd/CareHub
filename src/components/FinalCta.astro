@@ -1,0 +1,42 @@
+---
+/**
+ * The closing CTA band that ends every major page:
+ * "Not sure what you need? Call or message us and we will help coordinate the
+ * appropriate next step."
+ */
+import CtaButtons from './CtaButtons.astro';
+import { useTranslations } from '../i18n';
+import type { Lang } from '../config/site';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section final-cta" aria-labelledby="final-h">
+  <div class="container narrow-center text-center">
+    <h2 id="final-h">{t.finalCta.heading}</h2>
+    <p class="lead final-cta__text">{t.finalCta.text}</p>
+    <div class="final-cta__buttons">
+      <CtaButtons lang={lang} size="lg" showCallNumber={true} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .final-cta {
+    background: radial-gradient(700px 300px at 50% 0%, var(--navy-50), transparent 70%), var(--bg);
+  }
+  .final-cta__text {
+    margin-bottom: 1.5rem;
+  }
+  .final-cta__buttons {
+    display: flex;
+    justify-content: center;
+  }
+  .final-cta__buttons :global(.btn-row) {
+    justify-content: center;
+  }
+</style>

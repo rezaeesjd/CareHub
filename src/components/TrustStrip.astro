@@ -1,0 +1,50 @@
+---
+/**
+ * Four-point trust strip, ported from the printed flyer:
+ * One contact point / Home & hotel visits / English & Italian / Qualified professionals.
+ * No reviews, counts or years — trust comes from clarity and specificity.
+ */
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import type { Lang } from '../config/site';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" aria-labelledby="trust-h">
+  <div class="container">
+    <h2 id="trust-h" class="sr-only">{t.trust.heading}</h2>
+    <ul class="grid grid--4 trust">
+      {
+        t.trust.points.map((p) => (
+          <li class="trust__item">
+            <span class="medallion">
+              <Icon name={p.icon} size={26} />
+            </span>
+            <h3 class="trust__title">{p.title}</h3>
+            <p class="note">{p.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .trust {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .trust__item {
+    margin: 0;
+  }
+  .trust__title {
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+  }
+</style>

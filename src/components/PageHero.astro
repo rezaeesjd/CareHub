@@ -1,0 +1,43 @@
+---
+/**
+ * Inner-page hero: breadcrumb + eyebrow + H1 + lead, on the soft brand ground.
+ * Optional inline CTA buttons via the default slot.
+ */
+import Breadcrumbs from './Breadcrumbs.astro';
+
+interface Crumb {
+  name: string;
+  href?: string;
+}
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  crumbs?: Crumb[];
+}
+const { eyebrow, title, lead, crumbs } = Astro.props;
+---
+
+<section class="page-hero">
+  <div class="container">
+    {crumbs && <Breadcrumbs items={crumbs} class="page-hero__crumbs" />}
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1>{title}</h1>
+    {lead && <p class="lead page-hero__lead">{lead}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    background: linear-gradient(180deg, #fff 0%, var(--bg-soft) 100%);
+    padding-block: clamp(1.75rem, 5vw, 3rem);
+  }
+  .page-hero__crumbs {
+    margin-bottom: 1rem;
+  }
+  .page-hero__lead {
+    max-width: 42rem;
+    margin-bottom: 1.25rem;
+  }
+</style>

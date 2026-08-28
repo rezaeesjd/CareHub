@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import Faq from './Faq.astro';
+import FinalCta from './FinalCta.astro';
+import { useTranslations } from '../i18n';
+import { path } from '../config/routes';
+import type { Lang } from '../config/site';
+import { faqSchema, breadcrumbSchema, absoluteUrl } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const fp = t.faqPage;
+const crumbs = [{ name: t.breadcrumbHome, href: path('home', lang) }, { name: t.nav.faq }];
+const jsonLd = [
+  faqSchema(fp.qa),
+  breadcrumbSchema([
+    { name: t.breadcrumbHome, url: absoluteUrl(path('home', lang)) },
+    { name: t.nav.faq, url: absoluteUrl(path('faq', lang)) },
+  ]),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="faq"
+  title={fp.metaTitle}
+  description={fp.metaDescription}
+  jsonLd={jsonLd}
+>
+  <PageHero title={fp.h1} lead={fp.lead} crumbs={crumbs} />
+  <Faq items={fp.qa} />
+  <FinalCta lang={lang} />
+</BaseLayout>

@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { contact, telHref, mailtoHref } from '../config/site';
+import { path } from '../config/routes';
+import type { Lang } from '../config/site';
+import { whatsappUrl, whatsappMessage } from '../lib/whatsapp';
+import { breadcrumbSchema, absoluteUrl } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const cp = t.contactPage;
+const wa = whatsappUrl(lang);
+const crumbs = [{ name: t.breadcrumbHome, href: path('home', lang) }, { name: t.nav.contact }];
+const jsonLd = [
+  breadcrumbSchema([
+    { name: t.breadcrumbHome, url: absoluteUrl(path('home', lang)) },
+    { name: t.nav.contact, url: absoluteUrl(path('contact', lang)) },
+  ]),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="contact"
+  title={cp.metaTitle}
+  description={cp.metaDescription}
+  jsonLd={jsonLd}
+>
+  <PageHero title={cp.h1} lead={cp.lead} crumbs={crumbs} />
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid--3 contact-cards">
+        <a class="card contact-card" href={telHref} data-tel>
+          <span class="medallion"><Icon name="phone" size={24} /></span>
+          <h2>{cp.callHeading}</h2>
+          <span class="contact-card__value">{contact.phoneDisplay}</span>
+        </a>
+        <a
+          class="card contact-card contact-card--wa"
+          href={wa}
+          data-wa
+          data-wa-msg={whatsappMessage(lang)}
+          rel="noopener"
+        >
+          <span class="medallion contact-card__wa-medallion"
+            ><Icon name="whatsapp" size={26} /></span
+          >
+          <h2>{cp.whatsappHeading}</h2>
+          <span class="contact-card__value">{contact.phoneDisplay}</span>
+        </a>
+        <a class="card contact-card" href={mailtoHref} data-email>
+          <span class="medallion medallion--red"><Icon name="email" size={24} /></span>
+          <h2>{cp.emailHeading}</h2>
+          <span class="contact-card__value contact-card__value--sm">{contact.email}</span>
+        </a>
+      </div>
+
+      <p class="note contact-hours"><Icon name="contact" size={16} /> {cp.hoursNote}</p>
+
+      <div class="privacy-note" role="note">
+        <Icon name="shield" size={20} />
+        <p>{cp.privacyNotice}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-cards {
+    margin-bottom: 1.5rem;
+  }
+  .contact-card {
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition:
+      box-shadow 0.15s ease,
+      transform 0.05s ease;
+  }
+  .contact-card:hover {
+    box-shadow: var(--shadow);
+  }
+  .contact-card:active {
+    transform: translateY(1px);
+  }
+  .contact-card h2 {
+    font-size: 1.15rem;
+    margin-bottom: 0.35rem;
+  }
+  .contact-card__value {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--navy);
+  }
+  .contact-card__value--sm {
+    font-size: 1rem;
+    word-break: break-word;
+  }
+  .contact-card--wa {
+    border-color: var(--wa);
+  }
+  .contact-card__wa-medallion {
+    background: var(--wa);
+    color: #06331a;
+  }
+  .contact-hours {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 1.5rem;
+  }
+  .privacy-note {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: var(--navy-50);
+    border: 1px solid var(--navy-100);
+    border-radius: var(--r);
+    padding: 1rem 1.15rem;
+    max-width: 46rem;
+    color: var(--navy-700);
+  }
+  .privacy-note :global(svg) {
+    flex: none;
+    color: var(--navy);
+    margin-top: 2px;
+  }
+  .privacy-note p {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+</style>

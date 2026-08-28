@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import NotSureBand from '../../components/NotSureBand.astro';
+import TrustStrip from '../../components/TrustStrip.astro';
+import ServiceCards from '../../components/ServiceCards.astro';
+import HowItWorks from '../../components/HowItWorks.astro';
+import AdditionalCoordination from '../../components/AdditionalCoordination.astro';
+import FinalCta from '../../components/FinalCta.astro';
+import { serviceSchema } from '../../lib/seo';
+import { SITE_URL } from '../../config/site';
+import { path } from '../../config/routes';
+
+const lang = 'it' as const;
+const title = 'Florence Care 24 | Assistenza e Coordinamento Sanitario a Firenze';
+const description =
+  'Aiuto medico a Firenze quando ne hai più bisogno. Ti aiutiamo a metterti in contatto con professionisti sanitari qualificati per visite a domicilio e in hotel — infermieristica, fisioterapia e coordinamento. Chiama o scrivi su WhatsApp.';
+
+const jsonLd = [
+  serviceSchema({
+    name: 'Assistenza e coordinamento sanitario a Firenze',
+    description,
+    url: `${SITE_URL}${path('home', lang)}`,
+    serviceType: 'Assistenza e coordinamento sanitario',
+  }),
+];
+---
+
+<BaseLayout lang={lang} routeKey="home" title={title} description={description} jsonLd={jsonLd}>
+  <Hero lang={lang} />
+  <NotSureBand lang={lang} />
+  <TrustStrip lang={lang} />
+  <ServiceCards lang={lang} />
+  <HowItWorks lang={lang} />
+  <AdditionalCoordination lang={lang} />
+  <FinalCta lang={lang} />
+</BaseLayout>
