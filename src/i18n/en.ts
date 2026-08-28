@@ -297,6 +297,7 @@ export const en = {
     draftBanner:
       'DRAFT — this page is a placeholder pending review by a qualified Italian legal/privacy professional. It is not legal advice.',
     lastUpdatedLabel: 'Last updated',
+    providerRoleHeading: 'Our role',
     privacy: {
       metaTitle: 'Privacy Policy | Florence Care 24',
       metaDescription: 'Draft privacy policy for Florence Care 24, pending professional review.',

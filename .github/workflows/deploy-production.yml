@@ -73,10 +73,17 @@ jobs:
           if [ "${HOSTING_REMOTE_PATH#/}" = "$HOSTING_REMOTE_PATH" ]; then
             echo "HOSTING_REMOTE_PATH must be absolute (start with /)." >&2; exit 1
           fi
-          if [ "${#HOSTING_REMOTE_PATH}" -lt 6 ]; then
+          # Reject filesystem roots / system directories, even if length passes
+          # (rsync --delete against these could erase unrelated data).
+          STRIPPED="${HOSTING_REMOTE_PATH%/}"
+          case "$STRIPPED" in
+            ""|/|/home|/root|/etc|/var|/usr|/bin|/sbin|/lib|/lib64|/boot|/dev|/proc|/sys|/opt|/mnt|/media|/srv|/tmp|/run)
+              echo "Refusing to deploy: HOSTING_REMOTE_PATH is a system directory ('$STRIPPED')." >&2; exit 1 ;;
+          esac
+          if [ "${#STRIPPED}" -lt 6 ]; then
             echo "HOSTING_REMOTE_PATH too short to be a real web root." >&2; exit 1
           fi
-          REMOTE_PATH="${HOSTING_REMOTE_PATH%/}/"
+          REMOTE_PATH="${STRIPPED}/"
 
           # ---- Guard against an empty build ---------------------------------
           if [ ! -d dist ] || [ -z "$(ls -A dist)" ]; then

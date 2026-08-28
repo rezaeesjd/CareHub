@@ -1,10 +1,15 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { loadEnv } from 'vite';
 
-// The production domain. MUST be set via PUBLIC_SITE_URL in the deploy
-// environment before going live. See docs/DEPLOYMENT.md and .env.example.
-const SITE_URL = process.env.PUBLIC_SITE_URL || 'https://florencecare24.com';
+// The production domain. MUST be set via PUBLIC_SITE_URL before going live.
+// Use Vite's loadEnv so a value in .env is honoured here too (this config runs
+// before Vite injects import.meta.env, so a bare process.env read would miss a
+// .env-only value and desync the sitemap from canonical/robots). loadEnv also
+// includes matching process.env vars, so CI/deploy env vars still work.
+const { PUBLIC_SITE_URL } = loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), 'PUBLIC_');
+const SITE_URL = PUBLIC_SITE_URL || 'https://florencecare24.com';
 
 // https://astro.build/config
 export default defineConfig({

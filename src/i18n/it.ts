@@ -292,6 +292,7 @@ export const it: Dictionary = {
     draftBanner:
       'BOZZA — questa pagina è un segnaposto in attesa di revisione da parte di un professionista legale/privacy qualificato in Italia. Non costituisce consulenza legale.',
     lastUpdatedLabel: 'Ultimo aggiornamento',
+    providerRoleHeading: 'Il nostro ruolo',
     privacy: {
       metaTitle: 'Informativa sulla privacy | Florence Care 24',
       metaDescription:

@@ -31,12 +31,21 @@ if [[ "${REMOTE_PATH:0:1}" != "/" ]]; then
   echo "✖ HOSTING_REMOTE_PATH must be an absolute path (start with /). Got: '$REMOTE_PATH'" >&2
   exit 1
 fi
-if [[ "${#REMOTE_PATH}" -lt 6 ]]; then
-  echo "✖ HOSTING_REMOTE_PATH looks too short to be a real web root: '$REMOTE_PATH'" >&2
+# Reject filesystem roots / system directories, even if length passes
+# (rsync --delete against these could erase unrelated data).
+STRIPPED="${REMOTE_PATH%/}"
+case "$STRIPPED" in
+  ""|/|/home|/root|/etc|/var|/usr|/bin|/sbin|/lib|/lib64|/boot|/dev|/proc|/sys|/opt|/mnt|/media|/srv|/tmp|/run)
+    echo "✖ Refusing to deploy: HOSTING_REMOTE_PATH is a system directory: '$STRIPPED'" >&2
+    exit 1
+    ;;
+esac
+if [[ "${#STRIPPED}" -lt 6 ]]; then
+  echo "✖ HOSTING_REMOTE_PATH looks too short to be a real web root: '$STRIPPED'" >&2
   exit 1
 fi
 # Ensure a trailing slash so rsync writes INTO the directory.
-REMOTE_PATH="${REMOTE_PATH%/}/"
+REMOTE_PATH="${STRIPPED}/"
 
 # ---- Build -------------------------------------------------------------------
 echo "▶ Building static site..."
