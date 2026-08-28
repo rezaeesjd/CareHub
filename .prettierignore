@@ -1,0 +1,11 @@
+dist
+node_modules
+package-lock.json
+.astro
+public/assets/partners
+*.min.js
+*.min.css
+
+# Contains third-party GA4/GTM snippets (define:vars inline scripts) that the
+# Prettier Astro parser cannot process. Formatted by hand.
+src/components/Analytics.astro

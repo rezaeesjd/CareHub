@@ -1,0 +1,59 @@
+---
+/**
+ * Reusable WhatsApp + Call button pair. Used in the hero, the final CTA band
+ * and every service page. WhatsApp is green (upgraded with referral by the
+ * ContactBar script); Call is navy. Optional "See services" tertiary link.
+ */
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { telHref } from '../config/site';
+import type { Lang } from '../config/site';
+import { whatsappUrl, whatsappMessage } from '../lib/whatsapp';
+import { path } from '../config/routes';
+
+interface Props {
+  lang: Lang;
+  size?: 'md' | 'lg';
+  showCallNumber?: boolean;
+  showServices?: boolean;
+  onDark?: boolean;
+}
+const {
+  lang,
+  size = 'md',
+  showCallNumber = false,
+  showServices = false,
+  onDark = false,
+} = Astro.props;
+const t = useTranslations(lang);
+const wa = whatsappUrl(lang);
+const sz = size === 'lg' ? 'btn--lg' : '';
+---
+
+<div class="btn-row">
+  <a
+    class:list={['btn', 'btn--wa', sz]}
+    href={wa}
+    data-wa
+    data-wa-msg={whatsappMessage(lang)}
+    rel="noopener"
+  >
+    <Icon name="whatsapp" size={size === 'lg' ? 22 : 20} />
+    {t.cta.whatsapp}
+  </a>
+  <a class:list={['btn', 'btn--call', sz]} href={telHref} data-tel>
+    <Icon name="phone" size={size === 'lg' ? 20 : 18} />
+    {showCallNumber ? t.cta.callFull : t.cta.call}
+  </a>
+  {
+    showServices && (
+      <a
+        class:list={['btn', onDark ? 'btn--ghost-light' : 'btn--outline', sz]}
+        href={`${path('home', lang)}#services`}
+        data-cta="services"
+      >
+        {t.cta.seeServices}
+      </a>
+    )
+  }
+</div>

@@ -1,0 +1,85 @@
+---
+/**
+ * Accessible FAQ accordion using native <details>/<summary> — zero JavaScript,
+ * keyboard-friendly by default. The matching FAQPage JSON-LD is emitted by the
+ * page via src/lib/seo.ts.
+ */
+import Icon from './Icon.astro';
+
+interface QA {
+  q: string;
+  a: string;
+}
+interface Props {
+  items: QA[];
+  heading?: string;
+  id?: string;
+}
+const { items, heading, id } = Astro.props;
+---
+
+<section class="section faq" aria-labelledby={id ?? undefined}>
+  <div class="container narrow">
+    {heading && <h2 id={id}>{heading}</h2>}
+    <div class="faq__list">
+      {
+        items.map((item) => (
+          <details class="faq__item">
+            <summary>
+              <span>{item.q}</span>
+              <Icon name="chevron" size={20} class="faq__chevron" />
+            </summary>
+            <div class="faq__answer">
+              <p>{item.a}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq__list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .faq__item {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 0 1.1rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .faq__item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    list-style: none;
+    padding: 1.1rem 0;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 1.05rem;
+  }
+  .faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq__chevron {
+    flex: none;
+    color: var(--navy);
+    transition: transform 0.2s ease;
+  }
+  .faq__item[open] .faq__chevron {
+    transform: rotate(180deg);
+  }
+  .faq__answer {
+    padding-bottom: 1.1rem;
+    color: var(--muted);
+  }
+  .faq__answer p {
+    margin: 0;
+  }
+</style>

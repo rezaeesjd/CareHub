@@ -1,0 +1,75 @@
+---
+import { SITE_URL, brand, LANGS } from '../config/site';
+import type { Lang } from '../config/site';
+import { path } from '../config/routes';
+import type { RouteKey } from '../config/routes';
+
+interface Props {
+  lang: Lang;
+  routeKey: RouteKey;
+  title: string;
+  description: string;
+  /** JSON-LD objects to embed (already built via src/lib/seo.ts). */
+  jsonLd?: unknown[];
+  ogType?: string;
+  /** Override the canonical path (defaults to the route's path for this lang). */
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+const {
+  lang,
+  routeKey,
+  title,
+  description,
+  jsonLd = [],
+  ogType = 'website',
+  canonicalPath,
+  noindex = false,
+} = Astro.props;
+
+const canonicalRel = canonicalPath ?? path(routeKey, lang);
+const canonical = `${SITE_URL}${canonicalRel}`;
+const ogImage = `${SITE_URL}/assets/brand/og-default.svg`;
+const ogLocale = lang === 'it' ? 'it_IT' : 'en_US';
+
+// hreflang alternates for this route in every language + x-default (English).
+const alts = LANGS.map((l) => ({ lang: l, url: `${SITE_URL}${path(routeKey, l)}` }));
+const xDefault = `${SITE_URL}${path(routeKey, 'en')}`;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- hreflang -->
+{alts.map((a) => <link rel="alternate" hreflang={a.lang} href={a.url} />)}
+<link rel="alternate" hreflang="x-default" href={xDefault} />
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={brand.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={ogLocale} />
+<meta property="og:image" content={ogImage} />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<meta name="theme-color" content={brand.colors.navy} />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<!-- Structured data (conservative types only) -->
+{
+  jsonLd.map((obj) => (
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(obj)} />
+  ))
+}

@@ -1,0 +1,65 @@
+---
+/**
+ * Analytics loader. Renders NOTHING unless PUBLIC_GA_ID or PUBLIC_GTM_ID is set,
+ * so by default the site ships no tracking, no cookies and needs no cookie
+ * banner.
+ *
+ * When analytics IS enabled, it loads under Google Consent Mode v2 with every
+ * storage type defaulting to DENIED — so GA/GTM run in cookieless, consent-safe
+ * mode (EU-appropriate) and set no analytics/ads cookies until a consent signal
+ * grants them. A consent UI is intentionally NOT part of v1; to grant consent
+ * later, call:
+ *   gtag('consent', 'update', { analytics_storage: 'granted', ... })
+ * from a consent banner. See docs/SEO.md / docs/GOOGLE-ADS.md.
+ */
+import { analytics } from '../config/site';
+const { ga4Id, gtmId } = analytics;
+---
+
+{
+  (ga4Id || gtmId) && (
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      window.gtag = gtag;
+      // Consent Mode v2 — deny storage by default until consent is granted.
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+      });
+    </script>
+  )
+}
+
+{
+  ga4Id && (
+    <>
+      <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} async />
+      <script is:inline define:vars={{ ga4Id }}>
+        gtag('js', new Date());
+        gtag('config', ga4Id, { anonymize_ip: true });
+      </script>
+    </>
+  )
+}
+{
+  gtmId && (
+    <script is:inline define:vars={{ gtmId }}>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', gtmId);
+    </script>
+  )
+}

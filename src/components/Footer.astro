@@ -1,0 +1,177 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { contact, telHref, mailtoHref, serviceArea, brand } from '../config/site';
+import { path } from '../config/routes';
+import type { Lang } from '../config/site';
+import { whatsappUrl, whatsappMessage } from '../lib/whatsapp';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+const wa = whatsappUrl(lang);
+
+const siteLinks = [
+  { label: t.footer.links.services, href: `${path('home', lang)}#services` },
+  { label: t.footer.links.tourists, href: path('tourist', lang) },
+  { label: t.footer.links.about, href: path('about', lang) },
+  { label: t.footer.links.faq, href: path('faq', lang) },
+  { label: t.footer.links.contact, href: path('contact', lang) },
+];
+const legalLinks = [
+  { label: t.footer.links.privacy, href: path('privacy', lang) },
+  { label: t.footer.links.cookies, href: path('cookies', lang) },
+  { label: t.footer.links.terms, href: path('terms', lang) },
+];
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <Logo lang={lang} variant="footer" />
+      <p class="site-footer__disclaimer">{t.footer.disclaimer}</p>
+      <p class="site-footer__area">
+        <Icon name="pin" size={16} />
+        <span>{t.footer.serviceAreaHeading}: {serviceArea.description[lang]}</span>
+      </p>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>{t.footer.contactHeading}</h3>
+      <ul class="site-footer__list">
+        <li>
+          <a href={telHref} data-tel>
+            <Icon name="phone" size={16} />
+            {contact.phoneDisplay}
+          </a>
+        </li>
+        <li>
+          <a href={wa} data-wa data-wa-msg={whatsappMessage(lang)} rel="noopener">
+            <Icon name="whatsapp" size={16} />
+            {t.footer.whatsapp}
+          </a>
+        </li>
+        <li>
+          <a href={mailtoHref} data-email>
+            <Icon name="email" size={16} />
+            {contact.email}
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>{t.footer.linksHeading}</h3>
+      <ul class="site-footer__list">
+        {
+          siteLinks.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>{t.footer.languageHeading}</h3>
+      <ul class="site-footer__list">
+        <li><a href={path('home', 'it')} hreflang="it" lang="it">Italiano</a></li>
+        <li><a href={path('home', 'en')} hreflang="en" lang="en">English</a></li>
+      </ul>
+      <ul class="site-footer__list site-footer__legal">
+        {
+          legalLinks.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <p>© {year} {brand.name}. {t.footer.rights}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--navy-800);
+    color: #c9d6ea;
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    margin-top: auto;
+  }
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .site-footer__brand {
+    max-width: 30rem;
+  }
+  .site-footer__disclaimer {
+    margin-top: 1rem;
+    font-size: 0.92rem;
+    color: #a9bad4;
+    line-height: 1.55;
+  }
+  .site-footer__area {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: #a9bad4;
+  }
+  .site-footer__col h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 0.9rem;
+  }
+  .site-footer__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .site-footer__list a {
+    color: #c9d6ea;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+  }
+  .site-footer__list a:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+  .site-footer__legal {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.85rem;
+  }
+  .site-footer__bottom {
+    margin-top: 2.5rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.85rem;
+    color: #96a8c4;
+  }
+  .site-footer__bottom p {
+    margin: 0;
+  }
+  @media (min-width: 720px) {
+    .site-footer__grid {
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 2.5rem;
+    }
+  }
+</style>

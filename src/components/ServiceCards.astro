@@ -1,0 +1,81 @@
+---
+/**
+ * Homepage service clusters (Nursing / Physiotherapy / Tourists). Kept light —
+ * a few representative points and a link to the full page, not a catalogue.
+ */
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { clusters } from '../config/services';
+import { path } from '../config/routes';
+import type { Lang } from '../config/site';
+import type { RouteKey } from '../config/routes';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const cta: Record<string, { label: string; ctaAttr?: string }> = {
+  nursing: { label: t.cta.viewNursing },
+  physio: { label: t.cta.viewPhysio },
+  tourist: { label: t.cta.touristHelp, ctaAttr: 'tourist_help' },
+};
+---
+
+<section class="section section--soft" id="services" aria-labelledby="services-h">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{t.nav.services}</p>
+      <h2 id="services-h">{t.servicesSection.heading}</h2>
+      <p>{t.servicesSection.subheading}</p>
+    </div>
+
+    <div class="grid grid--3">
+      {
+        clusters.map((c) => (
+          <article class="card service-card">
+            <span class:list={['medallion', { 'medallion--red': c.accent === 'red' }]}>
+              <Icon name={c.icon} size={26} />
+            </span>
+            <h3>{c.title[lang]}</h3>
+            <p class="note service-card__note">{c.note[lang]}</p>
+            <p>{c.intro[lang]}</p>
+            <ul class="checklist service-card__list">
+              {c.items[lang].slice(0, 4).map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+            <a
+              class="btn btn--outline btn--block service-card__btn"
+              href={path(c.id as RouteKey, lang)}
+              data-cta={cta[c.id].ctaAttr}
+            >
+              {cta[c.id].label}
+              <Icon name="arrow" size={18} />
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .service-card__note {
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.75rem;
+  }
+  .service-card__list {
+    margin-block: 0.5rem 1.25rem;
+  }
+  .service-card__btn {
+    margin-top: auto;
+  }
+</style>

@@ -1,0 +1,90 @@
+---
+/**
+ * Persistent mobile Call | WhatsApp bar (hidden on desktop, where the header CTA
+ * and repeated section CTAs do the job). Present from pixel zero — no scroll
+ * trigger. Also hosts the one site-wide script that:
+ *   - captures ?ref= / UTM attribution (first-touch, 90 days)
+ *   - upgrades every [data-wa] link with the referral-tagged message
+ *   - fires GA4 conversion events on WhatsApp / phone / email clicks
+ */
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { telHref } from '../config/site';
+import type { Lang } from '../config/site';
+import { whatsappUrl, whatsappMessage } from '../lib/whatsapp';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const wa = whatsappUrl(lang);
+---
+
+<div
+  class="contact-bar"
+  role="region"
+  aria-label={t.contactBar.call + ' / ' + t.contactBar.whatsapp}
+>
+  <a class="contact-bar__btn contact-bar__btn--call" href={telHref} data-tel>
+    <Icon name="phone" size={22} />
+    <span>{t.contactBar.call}</span>
+  </a>
+  <a
+    class="contact-bar__btn contact-bar__btn--wa"
+    href={wa}
+    data-wa
+    data-wa-msg={whatsappMessage(lang)}
+    rel="noopener"
+  >
+    <Icon name="whatsapp" size={24} />
+    <span>{t.contactBar.whatsapp}</span>
+  </a>
+</div>
+
+<script>
+  import { initContactLinks } from '../lib/contact-links';
+  initContactLinks();
+</script>
+
+<style>
+  .contact-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 1px;
+    background: var(--line);
+    box-shadow: 0 -6px 20px rgba(15, 35, 64, 0.12);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .contact-bar__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 56px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    color: #fff;
+  }
+  .contact-bar__btn--call {
+    background: var(--navy);
+  }
+  .contact-bar__btn--wa {
+    background: var(--wa);
+    color: #06331a;
+  }
+  .contact-bar__btn:active {
+    filter: brightness(0.95);
+  }
+  @media (min-width: 900px) {
+    .contact-bar {
+      display: none;
+    }
+  }
+</style>

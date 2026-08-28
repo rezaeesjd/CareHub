@@ -1,0 +1,118 @@
+name: Deploy to production
+
+on:
+  # Deploy after a successful CI run on main.
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  # Or trigger manually.
+  workflow_dispatch:
+
+# Never run two deploys at once.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # For workflow_run: only proceed if CI actually succeeded.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    environment: production
+    steps:
+      - name: Checkout the exact commit that passed CI
+        uses: actions/checkout@v4
+        with:
+          # For a workflow_run trigger, deploy the SHA CI actually validated
+          # (not whatever is newest on main). Manual dispatch falls back to main.
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (lockfile)
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+        env:
+          PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
+          PUBLIC_GA_ID: ${{ secrets.PUBLIC_GA_ID }}
+          PUBLIC_GTM_ID: ${{ secrets.PUBLIC_GTM_ID }}
+
+      - name: Verify static output
+        run: npm run verify:dist
+
+      - name: Deploy over SSH + rsync
+        env:
+          HOSTING_HOST: ${{ secrets.HOSTING_HOST }}
+          HOSTING_PORT: ${{ secrets.HOSTING_PORT }}
+          HOSTING_USERNAME: ${{ secrets.HOSTING_USERNAME }}
+          HOSTING_REMOTE_PATH: ${{ secrets.HOSTING_REMOTE_PATH }}
+          HOSTING_SSH_KEY: ${{ secrets.HOSTING_SSH_KEY }}
+        run: |
+          set -euo pipefail
+
+          : "${HOSTING_HOST:?Set the HOSTING_HOST secret}"
+          : "${HOSTING_USERNAME:?Set the HOSTING_USERNAME secret}"
+          : "${HOSTING_REMOTE_PATH:?Set the HOSTING_REMOTE_PATH secret}"
+          : "${HOSTING_SSH_KEY:?Set the HOSTING_SSH_KEY secret}"
+          PORT="${HOSTING_PORT:-22}"
+
+          # ---- Safety guards on the remote path -----------------------------
+          case "$HOSTING_REMOTE_PATH" in
+            ""|"/"|"/*"|"//"|"."|"./"|"~"|"~/")
+              echo "Refusing to deploy: unsafe HOSTING_REMOTE_PATH." >&2; exit 1 ;;
+          esac
+          if [ "${HOSTING_REMOTE_PATH#/}" = "$HOSTING_REMOTE_PATH" ]; then
+            echo "HOSTING_REMOTE_PATH must be absolute (start with /)." >&2; exit 1
+          fi
+          # Reject filesystem roots / system directories, even if length passes
+          # (rsync --delete against these could erase unrelated data).
+          STRIPPED="${HOSTING_REMOTE_PATH%/}"
+          # Reject '.'/'..' components: the remote resolves e.g. /var/www/../ to
+          # /var/, which would slip past the literal denylist below.
+          case "/$STRIPPED/" in
+            */../*|*/./*)
+              echo "Refusing to deploy: HOSTING_REMOTE_PATH must not contain '.' or '..' path components." >&2; exit 1 ;;
+          esac
+          case "$STRIPPED" in
+            ""|/|/home|/root|/etc|/var|/usr|/bin|/sbin|/lib|/lib64|/boot|/dev|/proc|/sys|/opt|/mnt|/media|/srv|/tmp|/run)
+              echo "Refusing to deploy: HOSTING_REMOTE_PATH is a system directory ('$STRIPPED')." >&2; exit 1 ;;
+          esac
+          if [ "${#STRIPPED}" -lt 6 ]; then
+            echo "HOSTING_REMOTE_PATH too short to be a real web root." >&2; exit 1
+          fi
+          REMOTE_PATH="${STRIPPED}/"
+
+          # ---- Guard against an empty build ---------------------------------
+          if [ ! -d dist ] || [ -z "$(ls -A dist)" ]; then
+            echo "dist/ is empty — aborting deploy." >&2; exit 1
+          fi
+
+          # ---- Write the SSH key --------------------------------------------
+          mkdir -p ~/.ssh
+          printf '%s\n' "$HOSTING_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          echo "Deploying dist/ -> ${HOSTING_USERNAME}@${HOSTING_HOST}:${REMOTE_PATH}"
+          rsync -az --delete \
+            --exclude '.well-known/' \
+            -e "ssh -p ${PORT} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
+            dist/ "${HOSTING_USERNAME}@${HOSTING_HOST}:${REMOTE_PATH}"
+
+          rm -f ~/.ssh/deploy_key
+          echo "Deploy complete."
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "### Production deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Ref: \`main\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Files deployed: $(find dist -type f | wc -l)" >> "$GITHUB_STEP_SUMMARY"

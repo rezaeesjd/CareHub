@@ -1,0 +1,210 @@
+---
+import Logo from './Logo.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { path } from '../config/routes';
+import type { RouteKey } from '../config/routes';
+import type { Lang } from '../config/site';
+import { whatsappUrl, whatsappMessage } from '../lib/whatsapp';
+
+interface Props {
+  lang: Lang;
+  routeKey: RouteKey;
+}
+const { lang, routeKey } = Astro.props;
+const t = useTranslations(lang);
+const home = path('home', lang);
+
+const links: { label: string; href: string; key?: RouteKey }[] = [
+  { label: t.nav.services, href: `${home}#services` },
+  { label: t.nav.howItWorks, href: `${home}#how-it-works` },
+  { label: t.nav.tourists, href: path('tourist', lang), key: 'tourist' },
+  { label: t.nav.about, href: path('about', lang), key: 'about' },
+  { label: t.nav.faq, href: path('faq', lang), key: 'faq' },
+  { label: t.nav.contact, href: path('contact', lang), key: 'contact' },
+];
+const wa = whatsappUrl(lang);
+---
+
+<header class="site-header">
+  <div class="container site-header__row">
+    <Logo lang={lang} />
+
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      aria-label="Menu"
+    >
+      <span class="nav-toggle__bars" aria-hidden="true"></span>
+    </button>
+
+    <div class="site-nav" id="site-nav">
+      <nav class="site-nav__links" aria-label="Primary">
+        {
+          links.map((l) => (
+            <a
+              href={l.href}
+              class:list={['site-nav__link', { 'is-current': l.key && l.key === routeKey }]}
+              aria-current={l.key && l.key === routeKey ? 'page' : undefined}
+            >
+              {l.label}
+            </a>
+          ))
+        }
+      </nav>
+      <div class="site-nav__actions">
+        <LanguageSwitcher lang={lang} routeKey={routeKey} />
+        <a class="btn btn--wa" href={wa} data-wa data-wa-msg={whatsappMessage(lang)} rel="noopener">
+          <Icon name="whatsapp" size={20} />
+          {t.cta.whatsappShort}
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const header = document.querySelector<HTMLElement>('.site-header');
+  if (toggle && header) {
+    toggle.addEventListener('click', () => {
+      const open = header.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    // Close the menu when a link is chosen (mobile).
+    header.querySelectorAll('.site-nav__link').forEach((a) =>
+      a.addEventListener('click', () => {
+        header.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      })
+    );
+  }
+</script>
+
+<style>
+  .site-header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .site-header__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 68px;
+  }
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .nav-toggle__bars,
+  .nav-toggle__bars::before,
+  .nav-toggle__bars::after {
+    content: '';
+    display: block;
+    width: 22px;
+    height: 2.5px;
+    background: var(--navy);
+    border-radius: 2px;
+    position: relative;
+    transition: transform 0.2s ease;
+  }
+  .nav-toggle__bars::before {
+    position: absolute;
+    top: -7px;
+  }
+  .nav-toggle__bars::after {
+    position: absolute;
+    top: 7px;
+  }
+
+  /* Mobile: collapsible panel */
+  .site-nav {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 68px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 0.75rem var(--gutter) 1.25rem;
+    z-index: 90;
+  }
+  .site-header.is-open .site-nav {
+    display: block;
+  }
+  .site-header.is-open .nav-toggle__bars {
+    background: transparent;
+  }
+  .site-header.is-open .nav-toggle__bars::before {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .site-header.is-open .nav-toggle__bars::after {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+  .site-nav__links {
+    display: flex;
+    flex-direction: column;
+  }
+  .site-nav__link {
+    padding: 0.85rem 0.25rem;
+    font-weight: 600;
+    color: var(--navy);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .site-nav__link.is-current {
+    color: var(--red);
+  }
+  .site-nav__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  /* Desktop */
+  @media (min-width: 900px) {
+    .nav-toggle {
+      display: none;
+    }
+    .site-nav {
+      display: flex;
+      position: static;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: none;
+      border: none;
+      padding: 0;
+      background: none;
+    }
+    .site-nav__links {
+      flex-direction: row;
+      gap: 0.35rem;
+    }
+    .site-nav__link {
+      padding: 0.5rem 0.7rem;
+      border: none;
+      font-size: 0.98rem;
+      border-radius: 8px;
+    }
+    .site-nav__link:hover {
+      background: var(--navy-50);
+    }
+    .site-nav__actions {
+      margin-top: 0;
+    }
+  }
+</style>

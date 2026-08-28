@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+import Head from '../components/Head.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ContactBar from '../components/ContactBar.astro';
+import Analytics from '../components/Analytics.astro';
+import { contact } from '../config/site';
+import type { Lang } from '../config/site';
+import type { RouteKey } from '../config/routes';
+import { whatsappMessage } from '../lib/whatsapp';
+import { organizationSchema, websiteSchema } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  routeKey: RouteKey;
+  title: string;
+  description: string;
+  jsonLd?: unknown[];
+  ogType?: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+const {
+  lang,
+  routeKey,
+  title,
+  description,
+  jsonLd = [],
+  ogType,
+  canonicalPath,
+  noindex,
+} = Astro.props;
+
+// Organization + WebSite are safe to include on every page.
+const baseSchema = [organizationSchema(), websiteSchema(lang)];
+const schema = [...baseSchema, ...jsonLd];
+const skipLabel = lang === 'it' ? 'Vai al contenuto' : 'Skip to content';
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <Head
+      lang={lang}
+      routeKey={routeKey}
+      title={title}
+      description={description}
+      jsonLd={schema}
+      ogType={ogType}
+      canonicalPath={canonicalPath}
+      noindex={noindex}
+    />
+    <Analytics />
+  </head>
+  <body
+    class="has-contact-bar"
+    data-wa-number={contact.whatsappNumber}
+    data-wa-msg={whatsappMessage(lang)}
+  >
+    <a class="skip-link" href="#main">{skipLabel}</a>
+    <Header lang={lang} routeKey={routeKey} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <ContactBar lang={lang} />
+  </body>
+</html>

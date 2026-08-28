@@ -1,0 +1,50 @@
+---
+/**
+ * "Not sure what you need?" — the anxiety-resolving band. Sits high on the
+ * homepage, immediately below the fold, before the service list.
+ */
+import CtaButtons from './CtaButtons.astro';
+import { useTranslations } from '../i18n';
+import type { Lang } from '../config/site';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section notsure" aria-labelledby="notsure-h">
+  <div class="container notsure__inner">
+    <div>
+      <h2 id="notsure-h">{t.notSure.heading}</h2>
+      <p class="lead">{t.notSure.text}</p>
+    </div>
+    <CtaButtons lang={lang} />
+  </div>
+</section>
+
+<style>
+  .notsure {
+    background: var(--navy);
+    color: #eaf1fb;
+  }
+  .notsure :global(h2) {
+    color: #fff;
+  }
+  .notsure .lead {
+    color: #c9d8ef;
+    margin-bottom: 1.25rem;
+  }
+  .notsure__inner {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 860px) {
+    .notsure__inner {
+      grid-template-columns: 1.4fr auto;
+      align-items: center;
+      gap: 2.5rem;
+    }
+  }
+</style>

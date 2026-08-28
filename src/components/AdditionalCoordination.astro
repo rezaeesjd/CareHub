@@ -1,0 +1,67 @@
+---
+/**
+ * "Additional healthcare coordination" — clearly distinguishes Florence Care 24
+ * coordination from services performed by independent professionals / partners.
+ * The note makes explicit we do NOT own a lab, pharmacy or clinic.
+ */
+import Icon from './Icon.astro';
+import { useTranslations } from '../i18n';
+import { additionalCoordination } from '../config/services';
+import type { Lang } from '../config/site';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const items = additionalCoordination[lang];
+---
+
+<section class="section section--soft" aria-labelledby="addl-h">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="addl-h">{t.additional.heading}</h2>
+      <p>{t.additional.text}</p>
+    </div>
+    <ul class="pill-list">
+      {
+        items.map((i) => (
+          <li class="pill">
+            <Icon name="check" size={16} /> {i}
+          </li>
+        ))
+      }
+    </ul>
+    <p class="note addl__note">{t.additional.note}</p>
+  </div>
+</section>
+
+<style>
+  .pill-list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 0;
+  }
+  .pill :global(svg) {
+    color: var(--red);
+  }
+  .addl__note {
+    max-width: 46rem;
+  }
+</style>

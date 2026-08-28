@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import NotSureBand from '../../components/NotSureBand.astro';
+import TrustStrip from '../../components/TrustStrip.astro';
+import ServiceCards from '../../components/ServiceCards.astro';
+import HowItWorks from '../../components/HowItWorks.astro';
+import AdditionalCoordination from '../../components/AdditionalCoordination.astro';
+import FinalCta from '../../components/FinalCta.astro';
+import { serviceSchema } from '../../lib/seo';
+import { SITE_URL } from '../../config/site';
+import { path } from '../../config/routes';
+
+const lang = 'en' as const;
+const title = 'Florence Care 24 | Healthcare Assistance & Coordination in Florence';
+const description =
+  'Medical help in Florence when you need it most. We help connect you with qualified healthcare professionals for home and hotel visits — nursing, physiotherapy and coordination. Call or WhatsApp.';
+
+const jsonLd = [
+  serviceSchema({
+    name: 'Healthcare assistance and coordination in Florence',
+    description,
+    url: `${SITE_URL}${path('home', lang)}`,
+    serviceType: 'Healthcare assistance and coordination',
+  }),
+];
+---
+
+<BaseLayout lang={lang} routeKey="home" title={title} description={description} jsonLd={jsonLd}>
+  <Hero lang={lang} />
+  <NotSureBand lang={lang} />
+  <TrustStrip lang={lang} />
+  <ServiceCards lang={lang} />
+  <HowItWorks lang={lang} />
+  <AdditionalCoordination lang={lang} />
+  <FinalCta lang={lang} />
+</BaseLayout>

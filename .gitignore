@@ -141,3 +141,14 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Florence Care 24 — internal partner data (not committed / not deployed)
+partners.json
+public/assets/partners/*.svg
+public/assets/partners/*.png
+
+# Host snapshot artifacts (if ever created manually)
+host-snapshot/
+
+# Astro generated types
+.astro/
