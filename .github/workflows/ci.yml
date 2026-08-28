@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (lockfile)
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Lint (formatting)
+        run: npm run lint
+
+      - name: Build static site
+        run: npm run build
+        env:
+          # Use the real domain in CI builds so canonical/sitemap are correct.
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://florencecare24.com' }}
+
+      - name: Verify static output
+        run: npm run verify:dist
+
+      - name: Unit tests
+        run: npm test
