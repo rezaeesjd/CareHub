@@ -24,10 +24,14 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import QRCode from 'qrcode';
+import { loadEnv } from 'vite';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
-const SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://florencecare24.com').replace(/\/$/, '');
+// Honour a domain set only in .env (same as astro.config), so printed QR codes
+// never bake in the fallback domain. loadEnv also picks up process.env vars.
+const env = loadEnv(process.env.NODE_ENV ?? 'production', ROOT, 'PUBLIC_');
+const SITE_URL = (env.PUBLIC_SITE_URL || 'https://florencecare24.com').replace(/\/$/, '');
 
 function parseArgs(argv) {
   const args = {};

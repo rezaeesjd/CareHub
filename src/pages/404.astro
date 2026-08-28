@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
 import Icon from '../components/Icon.astro';
+import Analytics from '../components/Analytics.astro';
 import { contact, telHref } from '../config/site';
 import { whatsappUrl, whatsappMessage } from '../lib/whatsapp';
 import { useTranslations } from '../i18n';
@@ -20,6 +21,7 @@ const wa = whatsappUrl('en');
     <title>{en.metaTitle}</title>
     <meta name="robots" content="noindex" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <Analytics />
   </head>
   <body data-wa-number={contact.whatsappNumber} data-wa-msg={whatsappMessage('en')}>
     <main class="nf">

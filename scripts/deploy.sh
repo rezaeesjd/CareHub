@@ -34,6 +34,14 @@ fi
 # Reject filesystem roots / system directories, even if length passes
 # (rsync --delete against these could erase unrelated data).
 STRIPPED="${REMOTE_PATH%/}"
+# Reject '.'/'..' components: the remote resolves e.g. /var/www/../ to /var/,
+# which would slip past the literal denylist below.
+case "/$STRIPPED/" in
+  */../*|*/./*)
+    echo "✖ Refusing to deploy: HOSTING_REMOTE_PATH must not contain '.' or '..' path components." >&2
+    exit 1
+    ;;
+esac
 case "$STRIPPED" in
   ""|/|/home|/root|/etc|/var|/usr|/bin|/sbin|/lib|/lib64|/boot|/dev|/proc|/sys|/opt|/mnt|/media|/srv|/tmp|/run)
     echo "✖ Refusing to deploy: HOSTING_REMOTE_PATH is a system directory: '$STRIPPED'" >&2
