@@ -23,10 +23,12 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     environment: production
     steps:
-      - name: Checkout main
+      - name: Checkout the exact commit that passed CI
         uses: actions/checkout@v4
         with:
-          ref: main
+          # For a workflow_run trigger, deploy the SHA CI actually validated
+          # (not whatever is newest on main). Manual dispatch falls back to main.
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
 
       - name: Setup Node
         uses: actions/setup-node@v4

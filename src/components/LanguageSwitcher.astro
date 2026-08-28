@@ -38,7 +38,10 @@ const codeLabel: Record<Lang, string> = { en: 'EN', it: 'IT' };
 </nav>
 
 <script>
-  // Persist language preference and signal an analytics event.
+  // Persist language preference and signal an analytics event. Routing through
+  // trackEvent keeps the GTM-only (dataLayer) fallback working, not just gtag.
+  import { trackEvent } from '../lib/analytics';
+
   const links = document.querySelectorAll<HTMLAnchorElement>('[data-lang-choice]');
   links.forEach((a) => {
     a.addEventListener('click', () => {
@@ -48,11 +51,7 @@ const codeLabel: Record<Lang, string> = { en: 'EN', it: 'IT' };
       } catch {
         /* storage disabled — ignore */
       }
-      // analytics.ts consumer picks up window.gtag if present
-      const w = window as unknown as { gtag?: (...a: unknown[]) => void };
-      if (typeof w.gtag === 'function') {
-        w.gtag('event', 'language_change', { language: choice, page: location.pathname });
-      }
+      trackEvent('language_change', { language: choice, page: location.pathname });
     });
   });
 </script>

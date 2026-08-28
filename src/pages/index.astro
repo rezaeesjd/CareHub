@@ -22,6 +22,9 @@ import { SITE_URL } from '../config/site';
     <meta http-equiv="refresh" content="0; url=/en/" />
     <script is:inline>
       (function () {
+        // Preserve any ?ref= / utm_* / gclid query so first-touch attribution
+        // survives the language redirect from the bare root URL.
+        var qs = location.search || '';
         try {
           var saved = localStorage.getItem('fc24_lang');
           var lang =
@@ -30,9 +33,9 @@ import { SITE_URL } from '../config/site';
               : (navigator.language || 'en').toLowerCase().indexOf('it') === 0
                 ? 'it'
                 : 'en';
-          location.replace('/' + lang + '/');
+          location.replace('/' + lang + '/' + qs);
         } catch (e) {
-          location.replace('/en/');
+          location.replace('/en/' + qs);
         }
       })();
     </script>
