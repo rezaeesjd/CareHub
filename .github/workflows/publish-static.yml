@@ -4,11 +4,16 @@ name: Publish static site
 # deploy with no tools installed anywhere:
 #   1. a `deploy` branch that contains only the built HTML/CSS/JS (download its
 #      ZIP from GitHub, or point a host's "Git Version Control" at it), and
-#   2. a downloadable `florence-care-24-site` ZIP artifact on each run.
+#   2. a downloadable `florence-care-24-site` artifact on each run.
 # See docs/DEPLOYMENT.md → "Copy-and-paste (no tools) deploy".
+#
+# Runs only AFTER CI (type check + lint + build + verify + tests) succeeds on
+# main, so the published files always reflect a fully-validated commit.
 
 on:
-  push:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -24,9 +29,15 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # For workflow_run: only proceed when CI actually succeeded.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: Checkout source
+      - name: Checkout the exact commit CI validated
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -49,28 +60,35 @@ jobs:
       - name: Verify static output
         run: npm run verify:dist
 
-      - name: Package a ready-to-upload ZIP (contents at root)
-        run: |
-          cd dist
-          zip -r -q ../florence-care-24-site.zip .
-
-      - name: Upload the ZIP artifact
+      - name: Upload the ready-to-upload files (one unzip → the site)
         uses: actions/upload-artifact@v4
         with:
           name: florence-care-24-site
-          path: florence-care-24-site.zip
+          path: dist
+          include-hidden-files: true # keep .htaccess and other dotfiles
           retention-days: 90
 
-      - name: Publish built files to the `deploy` branch
+      - name: Publish built files to the `deploy` branch (preserving history)
         run: |
           cd dist
           git init -q
-          git checkout -q -b deploy
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # Base this release on the existing deploy history so a host's plain
+          # `git pull` fast-forwards (first run: deploy doesn't exist yet → new
+          # branch).
+          if git fetch origin deploy 2>/dev/null; then
+            git reset --soft FETCH_HEAD
+          fi
           git add -A
-          git commit -q -m "Deploy build from ${GITHUB_SHA::7}"
-          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:deploy
+          if git diff --cached --quiet; then
+            echo "No changes since the last publish — nothing to push."
+          else
+            git commit -q -m "Deploy build from ${GITHUB_SHA::7}"
+            git push origin HEAD:deploy
+            echo "Published to the deploy branch."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -80,6 +98,6 @@ jobs:
             echo "### ✅ Ready-to-serve site published"
             echo ""
             echo "- **\`deploy\` branch** updated with the built files (download its ZIP or pull it on your host)."
-            echo "- **ZIP artifact** \`florence-care-24-site\` attached to this run."
-            echo "- Files published: $(find dist -type f | wc -l)"
+            echo "- **Artifact** \`florence-care-24-site\` attached to this run — unzip once to get the site."
+            echo "- Files published: $(find dist -type f -not -path './.git/*' | wc -l)"
           } >> "$GITHUB_STEP_SUMMARY"

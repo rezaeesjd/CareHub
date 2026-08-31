@@ -21,22 +21,23 @@ prevents a compromised server from flowing back into source.)
 
 ## Copy-and-paste (no tools) deploy — recommended if you upload files yourself
 
-GitHub builds the site on every push to `main` (workflow
+After CI passes on `main`, GitHub builds the site (workflow
 `.github/workflows/publish-static.yml`) and publishes the finished files two ways:
 
 - a **`deploy` branch** that contains ONLY the ready-to-serve site, and
-- a downloadable **ZIP** (`florence-care-24-site`) attached to each run.
+- a downloadable **artifact** (`florence-care-24-site`) attached to each run.
 
 You need nothing installed. To put the site online:
 
-### Option 1 — download the ZIP, upload to the host
+### Option 1 — download the files, upload to the host
 
 1. On GitHub: **Actions → Publish static site → (latest run) → Artifacts →
-   `florence-care-24-site`** → download and unzip.
-2. Upload the **contents** of that folder into your host's web root
-   (`public_html`, `htdocs`, `www` — whatever your host calls it) via your
-   host's File Manager or any SFTP/FTP app. Upload the files themselves, not a
-   wrapping folder.
+   `florence-care-24-site`** → download. GitHub gives you one ZIP; **unzip it
+   once** and you get the site files (`index.html`, `.htaccess`, `en/`, `it/`,
+   `assets/`, …) at the top level.
+2. Upload **those files** into your host's web root (`public_html`, `htdocs`,
+   `www` — whatever your host calls it) via your host's File Manager or any
+   SFTP/FTP app. Upload the files themselves, not a wrapping folder.
 3. Done — visiting your domain shows the site.
 
 ### Option 2 — download the `deploy` branch as a ZIP
