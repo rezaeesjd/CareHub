@@ -17,10 +17,17 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # For workflow_run: only proceed if CI actually succeeded.
+    # This SSH deploy is OPTIONAL. It runs ONLY when you opt in by setting the
+    # repository variable DEPLOY_SSH_ENABLED=true (Settings → Secrets and
+    # variables → Actions → Variables) alongside the hosting secrets. When the
+    # variable is unset the whole job is skipped — so it never enters the
+    # `production` environment (avoiding a stuck "waiting for approval" if that
+    # environment has required reviewers) and the Actions tab stays clean. Most
+    # users deploy via the `deploy` branch / artifact instead (see docs).
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      vars.DEPLOY_SSH_ENABLED == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       github.event.workflow_run.conclusion == 'success')
     environment: production
     steps:
       - name: Checkout the exact commit that passed CI
@@ -111,7 +118,6 @@ jobs:
           echo "Deploy complete."
 
       - name: Deployment summary
-        if: always()
         run: |
           echo "### Production deploy" >> "$GITHUB_STEP_SUMMARY"
           echo "- Ref: \`main\`" >> "$GITHUB_STEP_SUMMARY"

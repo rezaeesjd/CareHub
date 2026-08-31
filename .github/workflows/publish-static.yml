@@ -1,0 +1,106 @@
+name: Publish static site
+
+# Builds the finished website and publishes the READY-TO-SERVE files so you can
+# deploy with no tools installed anywhere:
+#   1. a `deploy` branch that contains only the built HTML/CSS/JS (download its
+#      ZIP from GitHub, or point a host's "Git Version Control" at it), and
+#   2. a downloadable `florence-care-24-site` artifact on each run.
+# See docs/DEPLOYMENT.md → "Copy-and-paste (no tools) deploy".
+#
+# Runs only AFTER CI (type check + lint + build + verify + tests) succeeds on
+# main, so the published files always reflect a fully-validated commit.
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Needs write access to push the generated `deploy` branch (uses the built-in
+# GITHUB_TOKEN — no secret to configure).
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-static
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # For workflow_run: only proceed when CI actually succeeded AND it was a push
+    # to this repo (not a fork PR whose head branch happens to be named `main`) —
+    # this job has a contents:write token and checks out the triggering SHA.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    steps:
+      - name: Checkout the exact commit CI validated
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (lockfile)
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+        env:
+          # Set these as repository VARIABLES (Settings → Secrets and variables
+          # → Actions → Variables) — they are public, not secrets.
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://florencecare24.com' }}
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
+          PUBLIC_GTM_ID: ${{ vars.PUBLIC_GTM_ID }}
+
+      - name: Verify static output
+        run: npm run verify:dist
+
+      - name: Upload the ready-to-upload files (one unzip → the site)
+        uses: actions/upload-artifact@v4
+        with:
+          name: florence-care-24-site
+          path: dist
+          include-hidden-files: true # keep .htaccess and other dotfiles
+          retention-days: 90
+
+      - name: Publish built files to the `deploy` branch (preserving history)
+        run: |
+          cd dist
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # Base this release on the existing deploy history so a host's plain
+          # `git pull` fast-forwards (first run: deploy doesn't exist yet → new
+          # branch).
+          if git fetch origin deploy 2>/dev/null; then
+            git reset --soft FETCH_HEAD
+          fi
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes since the last publish — nothing to push."
+          else
+            git commit -q -m "Deploy build from ${GITHUB_SHA::7}"
+            git push origin HEAD:deploy
+            echo "Published to the deploy branch."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          {
+            echo "### ✅ Ready-to-serve site published"
+            echo ""
+            echo "- **\`deploy\` branch** updated with the built files (download its ZIP or pull it on your host)."
+            echo "- **Artifact** \`florence-care-24-site\` attached to this run — unzip once to get the site."
+            echo "- Files published: $(find dist -type f -not -path './.git/*' | wc -l)"
+          } >> "$GITHUB_STEP_SUMMARY"

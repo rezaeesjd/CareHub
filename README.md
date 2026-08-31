@@ -51,11 +51,18 @@ npm run verify:dist # sanity-check the built dist/
 
 ## Deployment
 
-`main` is the source of truth. On a successful CI run on `main` (or a manual
-trigger), GitHub Actions builds the site and rsyncs `dist/` to your host over
-SSH. Credentials live only in **GitHub Secrets**. Full details and the required
-secrets: **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** and
-**[docs/HOSTING.md](./docs/HOSTING.md)**.
+`main` is the source of truth, and **GitHub builds the site for you** — you
+never install Node/npm on your computer or the host. Two paths:
+
+- **Copy-and-paste (no tools):** each push to `main` publishes the finished
+  files to a **`deploy` branch** and a downloadable **ZIP** (workflow
+  `publish-static.yml`). Download it and upload to your web root, or point a
+  host's Git Version Control at the `deploy` branch to auto-sync.
+- **Automatic SSH deploy (optional):** set hosting secrets and GitHub rsyncs to
+  your host on every merge; skips cleanly if the secrets aren't set.
+
+Full steps (and set `PUBLIC_SITE_URL` first): **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)**
+and **[docs/HOSTING.md](./docs/HOSTING.md)**.
 
 ## Editing content
 
