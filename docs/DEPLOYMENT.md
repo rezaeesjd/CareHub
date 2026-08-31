@@ -77,8 +77,10 @@ output) — see [HOSTING.md](./HOSTING.md).
 ## Automatic SSH deploy (optional) — GitHub pushes to the host for you
 
 If you'd rather GitHub upload straight to the host on every merge (no manual
-download), use the SSH path below instead. It's **optional**: if you don't set
-the hosting secrets, that workflow skips cleanly and you just use the
+download), use the SSH path below instead. It's **optional and off by default**:
+the deploy job runs only when you set the repository variable
+**`DEPLOY_SSH_ENABLED=true`** (plus the hosting secrets). Until then the job is
+skipped entirely — it never runs and never waits — and you just use the
 copy-and-paste path above.
 
 ## Continuous integration — `.github/workflows/ci.yml`
@@ -100,13 +102,21 @@ Runs automatically after CI succeeds on `main`, or manually via
 **Actions → Deploy to production → Run workflow**. It builds the site with
 production env, verifies `dist/`, then rsyncs over SSH to your host.
 
-If the hosting secrets below are **not** configured, this workflow **skips
-cleanly** (the run stays green) — so it's safe to ignore entirely if you use the
-copy-and-paste path above.
+This workflow runs **only** when the repository variable
+`DEPLOY_SSH_ENABLED` is `true`; otherwise the job is skipped (it never enters the
+`production` environment, so it can't get stuck "waiting for approval"). Safe to
+ignore entirely if you use the copy-and-paste path above.
 
-### Required GitHub secrets
+### To enable it — one variable + secrets
 
-Set these in **Settings → Secrets and variables → Actions**:
+First add the opt-in **variable** under **Settings → Secrets and variables →
+Actions → Variables**:
+
+| Variable             | Value  |
+| -------------------- | ------ |
+| `DEPLOY_SSH_ENABLED` | `true` |
+
+Then add the **secrets** under the same page → **Secrets**:
 
 | Secret                | Example                      | Notes                                |
 | --------------------- | ---------------------------- | ------------------------------------ |
