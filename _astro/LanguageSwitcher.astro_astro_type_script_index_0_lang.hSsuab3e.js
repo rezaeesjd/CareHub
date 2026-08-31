@@ -1,0 +1,1 @@
+import{t}from"./analytics.bNU9e3nk.js";const c=document.querySelectorAll("[data-lang-choice]");c.forEach(e=>{e.addEventListener("click",()=>{const a=e.dataset.langChoice;try{a&&window.localStorage.setItem("fc24_lang",a)}catch{}t("language_change",{language:a,page:location.pathname})})});

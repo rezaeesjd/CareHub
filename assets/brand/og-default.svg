@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="1" stop-color="#eef3fa" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- skyline -->
+  <g fill="#1b3a6b" opacity="0.08">
+    <rect x="80" y="470" width="90" height="160" />
+    <path d="M470 630v-90a90 90 0 0 1 180 0v90z" />
+    <rect x="536" y="405" width="48" height="45" />
+    <path d="M560 360l26 45h-52z" />
+    <rect x="700" y="430" width="46" height="200" />
+    <rect x="820" y="500" width="120" height="130" />
+    <rect x="1010" y="470" width="110" height="160" />
+  </g>
+
+  <!-- emblem -->
+  <g transform="translate(96,150)">
+    <path
+      d="M60 108S15 78 15 47.5C15 32 26 22 39 22c8.5 0 15.5 4.5 21 11.5C65.5 26.5 72.5 22 81 22c13 0 24 10 24 25.5C105 78 60 108 60 108Z"
+      fill="#1b3a6b"
+    />
+    <path d="M60 34c5.3 0 9 4.7 9 10.5H51c0-5.8 3.7-10.5 9-10.5Z" fill="#d62828" />
+    <path d="M54 52h12v9h9v11h-9v9H54v-9h-9V61h9V52Z" fill="#ffffff" />
+  </g>
+
+  <!-- wordmark -->
+  <text x="230" y="235" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="72" font-weight="800" fill="#1b3a6b">
+    Florence <tspan fill="#d62828">Care</tspan> <tspan fill="#d62828">24</tspan>
+  </text>
+  <text x="232" y="285" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="30" letter-spacing="3" fill="#566a86">
+    HEALTHCARE ASSISTANCE &amp; COORDINATION
+  </text>
+  <text x="96" y="400" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="52" font-weight="800" fill="#1b3a6b">
+    Medical help in Florence
+  </text>
+  <text x="96" y="462" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="52" font-weight="800" fill="#d62828">
+    when you need it most.
+  </text>
+</svg>

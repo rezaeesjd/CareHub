@@ -1,0 +1,17 @@
+{
+  "name": "Florence Care 24",
+  "short_name": "Florence Care 24",
+  "description": "Healthcare Assistance & Coordination in Florence.",
+  "start_url": "/en/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#1b3a6b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
