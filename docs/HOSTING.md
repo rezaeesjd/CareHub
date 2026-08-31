@@ -46,8 +46,10 @@ is **optional** and conservative — each block is commented:
 1. **HTTPS redirect** — commented out; enable once your SSL certificate is live.
 2. **Security headers** — `X-Content-Type-Options`, `Referrer-Policy`,
    `Permissions-Policy` (and HSTS, commented, for after HTTPS is confirmed).
-3. **Compression** (`mod_deflate`) and **caching** (`mod_expires`).
-4. **Custom 404** → `/404.html`.
+3. **Deny `.git`** — blocks VCS metadata if a checkout ever lands in the web
+   root (defense in depth; `.well-known` still served).
+4. **Compression** (`mod_deflate`) and **caching** (`mod_expires`).
+5. **Custom 404** → `/404.html`.
 
 Remove any block your host doesn't support. If your host is **not** Apache
 (nginx, a static-CDN host, etc.), configure the equivalent headers/caching in

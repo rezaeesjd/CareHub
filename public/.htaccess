@@ -21,6 +21,15 @@
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
 
+# ---- 2b. Deny VCS metadata (defense in depth) -------------------------------
+# If you deploy by cloning the `deploy` branch into the web root, its .git
+# directory would otherwise be reachable. Block it (and .gitignore etc.). This
+# does NOT affect .well-known, which is still served for SSL/ACME.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule (^|/)\.git(/|$) - [F,L]
+</IfModule>
+
 # ---- 3. Compression ---------------------------------------------------------
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml text/plain

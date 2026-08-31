@@ -52,7 +52,13 @@ You need nothing installed. To put the site online:
 If your host has **Git Version Control** (common in cPanel/Plesk):
 
 1. In the host panel, **clone** your GitHub repo and select the **`deploy`**
-   branch, with the deploy path set to your web root.
+   branch. Clone it to a **private path OUTSIDE the web root** (e.g.
+   `~/repos/florence-deploy`, not `public_html`), then set the panel's
+   **deployment path** to your web root — this copies the built files into the
+   served directory while keeping the checkout's `.git` folder out of it.
+   (If your panel can only clone straight into the web root, that's still safe:
+   the shipped `.htaccess` denies `.git` requests as a backstop — but a path
+   outside the web root is better.)
 2. Because `deploy` already contains built files, the host runs **no build** —
    it just serves them.
 3. After any change reaches `main`, GitHub rebuilds `deploy`; click **Update
