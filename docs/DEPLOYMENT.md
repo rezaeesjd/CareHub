@@ -47,6 +47,15 @@ You need nothing installed. To put the site online:
 2. Unzip; it contains one top folder (`CareHub-deploy/`). Upload the **contents
    of that folder** into your web root.
 
+> **Updating later (Options 1 & 2):** a new release may remove or rename a page.
+> Uploading the new files overwrites matching ones but leaves the deleted ones
+> behind, so the site would stop matching GitHub. Before re-uploading, **clear
+> the old generated files from the web root** (delete its contents), then upload
+> the fresh set — but **keep host-managed paths** like `.well-known` (used for
+> SSL). If your upload tool has a "sync / mirror (delete extras)" mode, use it
+> and exclude `.well-known`. Option 3 (host pulls `deploy`) handles this
+> automatically.
+
 ### Option 3 — let the host pull the `deploy` branch (auto-sync, no upload)
 
 If your host has **Git Version Control** (common in cPanel/Plesk):
