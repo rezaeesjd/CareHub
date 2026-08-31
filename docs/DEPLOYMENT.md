@@ -12,6 +12,74 @@ afterwards and redeploy, so GitHub stays authoritative. (We deliberately do
 **not** run any automatic host→GitHub sync — that avoids overwrite loops and
 prevents a compromised server from flowing back into source.)
 
+> **Important:** the repository holds the _source_. A web host needs the
+> _built_ files (plain HTML/CSS/JS). GitHub builds them for you — you never
+> install Node, npm, or anything on your computer or on the host. Pick a path
+> below.
+
+---
+
+## Copy-and-paste (no tools) deploy — recommended if you upload files yourself
+
+GitHub builds the site on every push to `main` (workflow
+`.github/workflows/publish-static.yml`) and publishes the finished files two ways:
+
+- a **`deploy` branch** that contains ONLY the ready-to-serve site, and
+- a downloadable **ZIP** (`florence-care-24-site`) attached to each run.
+
+You need nothing installed. To put the site online:
+
+### Option 1 — download the ZIP, upload to the host
+
+1. On GitHub: **Actions → Publish static site → (latest run) → Artifacts →
+   `florence-care-24-site`** → download and unzip.
+2. Upload the **contents** of that folder into your host's web root
+   (`public_html`, `htdocs`, `www` — whatever your host calls it) via your
+   host's File Manager or any SFTP/FTP app. Upload the files themselves, not a
+   wrapping folder.
+3. Done — visiting your domain shows the site.
+
+### Option 2 — download the `deploy` branch as a ZIP
+
+1. On GitHub: switch the branch dropdown to **`deploy`** → **Code → Download
+   ZIP**.
+2. Unzip; it contains one top folder (`CareHub-deploy/`). Upload the **contents
+   of that folder** into your web root.
+
+### Option 3 — let the host pull the `deploy` branch (auto-sync, no upload)
+
+If your host has **Git Version Control** (common in cPanel/Plesk):
+
+1. In the host panel, **clone** your GitHub repo and select the **`deploy`**
+   branch, with the deploy path set to your web root.
+2. Because `deploy` already contains built files, the host runs **no build** —
+   it just serves them.
+3. After any change reaches `main`, GitHub rebuilds `deploy`; click **Update
+   from Remote** (or set the host's webhook) to pull the new version. This is
+   the "synced with GitHub" flow with nothing installed on your side.
+
+**Set your domain first (one click, no install):** so links, the sitemap and
+canonical tags use your real address, add a repository _variable_
+**`PUBLIC_SITE_URL`** = `https://yourdomain.com` under **Settings → Secrets and
+variables → Actions → Variables**. (Optional: `PUBLIC_GA_ID`, `PUBLIC_GTM_ID`
+for analytics.) Then re-run **Publish static site** so the files pick it up.
+
+**Serve from the domain/subdomain root**, not a sub-folder like
+`example.com/site/` — the site uses root-absolute links (`/en/`, `/assets/…`).
+Root or a subdomain (e.g. `www.` or `care.yourdomain.com`) both work.
+
+Apache hosts also get `.htaccess` automatically (it ships inside the built
+output) — see [HOSTING.md](./HOSTING.md).
+
+---
+
+## Automatic SSH deploy (optional) — GitHub pushes to the host for you
+
+If you'd rather GitHub upload straight to the host on every merge (no manual
+download), use the SSH path below instead. It's **optional**: if you don't set
+the hosting secrets, that workflow skips cleanly and you just use the
+copy-and-paste path above.
+
 ## Continuous integration — `.github/workflows/ci.yml`
 
 Runs on every pull request and on pushes to `main` / `develop`:
@@ -30,6 +98,10 @@ The build fails the workflow on any error.
 Runs automatically after CI succeeds on `main`, or manually via
 **Actions → Deploy to production → Run workflow**. It builds the site with
 production env, verifies `dist/`, then rsyncs over SSH to your host.
+
+If the hosting secrets below are **not** configured, this workflow **skips
+cleanly** (the run stays green) — so it's safe to ignore entirely if you use the
+copy-and-paste path above.
 
 ### Required GitHub secrets
 

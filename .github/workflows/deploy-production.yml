@@ -23,7 +23,21 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     environment: production
     steps:
+      # This SSH deploy is OPTIONAL. If the hosting secrets are not set (e.g. you
+      # deploy by downloading the `deploy` branch / ZIP instead), skip cleanly so
+      # the run stays green rather than failing.
+      - name: Check hosting configuration
+        id: gate
+        run: |
+          if [ -n "${{ secrets.HOSTING_HOST }}" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "SSH hosting secrets not configured — skipping SSH deploy. Use the 'deploy' branch / ZIP (see docs/DEPLOYMENT.md)."
+          fi
+
       - name: Checkout the exact commit that passed CI
+        if: steps.gate.outputs.ready == 'true'
         uses: actions/checkout@v4
         with:
           # For a workflow_run trigger, deploy the SHA CI actually validated
@@ -31,15 +45,18 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || 'main' }}
 
       - name: Setup Node
+        if: steps.gate.outputs.ready == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies (lockfile)
+        if: steps.gate.outputs.ready == 'true'
         run: npm ci
 
       - name: Build static site
+        if: steps.gate.outputs.ready == 'true'
         run: npm run build
         env:
           PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
@@ -47,9 +64,11 @@ jobs:
           PUBLIC_GTM_ID: ${{ secrets.PUBLIC_GTM_ID }}
 
       - name: Verify static output
+        if: steps.gate.outputs.ready == 'true'
         run: npm run verify:dist
 
       - name: Deploy over SSH + rsync
+        if: steps.gate.outputs.ready == 'true'
         env:
           HOSTING_HOST: ${{ secrets.HOSTING_HOST }}
           HOSTING_PORT: ${{ secrets.HOSTING_PORT }}
@@ -111,7 +130,7 @@ jobs:
           echo "Deploy complete."
 
       - name: Deployment summary
-        if: always()
+        if: steps.gate.outputs.ready == 'true'
         run: |
           echo "### Production deploy" >> "$GITHUB_STEP_SUMMARY"
           echo "- Ref: \`main\`" >> "$GITHUB_STEP_SUMMARY"

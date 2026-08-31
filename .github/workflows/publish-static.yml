@@ -1,0 +1,85 @@
+name: Publish static site
+
+# Builds the finished website and publishes the READY-TO-SERVE files so you can
+# deploy with no tools installed anywhere:
+#   1. a `deploy` branch that contains only the built HTML/CSS/JS (download its
+#      ZIP from GitHub, or point a host's "Git Version Control" at it), and
+#   2. a downloadable `florence-care-24-site` ZIP artifact on each run.
+# See docs/DEPLOYMENT.md → "Copy-and-paste (no tools) deploy".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Needs write access to push the generated `deploy` branch (uses the built-in
+# GITHUB_TOKEN — no secret to configure).
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-static
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (lockfile)
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+        env:
+          # Set these as repository VARIABLES (Settings → Secrets and variables
+          # → Actions → Variables) — they are public, not secrets.
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://florencecare24.com' }}
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
+          PUBLIC_GTM_ID: ${{ vars.PUBLIC_GTM_ID }}
+
+      - name: Verify static output
+        run: npm run verify:dist
+
+      - name: Package a ready-to-upload ZIP (contents at root)
+        run: |
+          cd dist
+          zip -r -q ../florence-care-24-site.zip .
+
+      - name: Upload the ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: florence-care-24-site
+          path: florence-care-24-site.zip
+          retention-days: 90
+
+      - name: Publish built files to the `deploy` branch
+        run: |
+          cd dist
+          git init -q
+          git checkout -q -b deploy
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy build from ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          {
+            echo "### ✅ Ready-to-serve site published"
+            echo ""
+            echo "- **\`deploy\` branch** updated with the built files (download its ZIP or pull it on your host)."
+            echo "- **ZIP artifact** \`florence-care-24-site\` attached to this run."
+            echo "- Files published: $(find dist -type f | wc -l)"
+          } >> "$GITHUB_STEP_SUMMARY"
