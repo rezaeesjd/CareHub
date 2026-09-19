@@ -29,7 +29,8 @@ const {
 
 const canonicalRel = canonicalPath ?? path(routeKey, lang);
 const canonical = `${SITE_URL}${canonicalRel}`;
-const ogImage = `${SITE_URL}/assets/brand/og-default.svg`;
+// PNG (not SVG) so WhatsApp / Facebook / iMessage / LinkedIn render the preview.
+const ogImage = `${SITE_URL}/assets/brand/og-default.png`;
 const ogLocale = lang === 'it' ? 'it_IT' : 'en_US';
 
 // hreflang alternates for this route in every language + x-default (English).
@@ -56,6 +57,10 @@ const xDefault = `${SITE_URL}${path(routeKey, 'en')}`;
 <meta property="og:url" content={canonical} />
 <meta property="og:locale" content={ogLocale} />
 <meta property="og:image" content={ogImage} />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={brand.name} />
 
 <!-- Twitter / X -->
 <meta name="twitter:card" content="summary_large_image" />
@@ -64,7 +69,13 @@ const xDefault = `${SITE_URL}${path(routeKey, 'en')}`;
 <meta name="twitter:image" content={ogImage} />
 
 <meta name="theme-color" content={brand.colors.navy} />
+<!-- Favicons: SVG for modern browsers, .ico + PNG fallbacks for Safari/old
+     browsers, apple-touch-icon for iOS home screens. -->
+<link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 
 <!-- Structured data (conservative types only) -->

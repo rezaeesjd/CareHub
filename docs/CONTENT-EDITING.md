@@ -67,13 +67,40 @@ bullets of each; the service page shows all of them.
 
 ## Images / brand assets
 
-The current logo and hero are lightweight SVG (no external photos, fast on hotel
-wifi). Placeholders you may replace later:
+The logo and hero are lightweight SVG (no external photos, fast on hotel wifi).
 
-| File                                          | Replace with                                          |
-| --------------------------------------------- | ----------------------------------------------------- |
-| `public/favicon.svg`                          | your final favicon (SVG is fine)                      |
-| `public/assets/brand/og-default.svg`          | a 1200×630 **PNG/JPG** for best social-share previews |
-| Hero background (`src/components/Hero.astro`) | an optimised WebP photo if desired                    |
+### Favicon & social-share image (generated)
+
+The brand emblem is defined once in **`public/favicon.svg`**, and the OG preview
+in **`public/assets/brand/og-default.svg`**. From those two source SVGs we
+generate the raster files browsers and chat apps need (all committed in
+`public/`):
+
+| Generated file                     | Used for                                         |
+| ---------------------------------- | ------------------------------------------------ |
+| `favicon.ico`                      | classic tab-icon fallback (Safari, old browsers) |
+| `favicon-16.png`, `favicon-32.png` | PNG tab icons                                    |
+| `apple-touch-icon.png`             | iOS "Add to Home Screen"                         |
+| `icon-192.png`, `icon-512.png`     | PWA / manifest                                   |
+| `assets/brand/og-default.png`      | WhatsApp / Facebook / iMessage link previews     |
+
+Social apps **cannot** show an SVG preview, and Safari is unreliable with an
+SVG-only favicon — that's why the PNG/ICO versions exist.
+
+**To change them:** edit the source SVG(s), then regenerate:
+
+```bash
+npm i -D sharp && npm run icons:generate && npm remove sharp
+```
+
+(`sharp` is only needed for this one-off step, so it isn't a project dependency.)
+
+You can also just drop in your own final files with the same names.
+
+### Other imagery
+
+| File                                          | Replace with                       |
+| --------------------------------------------- | ---------------------------------- |
+| Hero background (`src/components/Hero.astro`) | an optimised WebP photo if desired |
 
 If you add a photo, always set width/height, provide alt text, and export WebP.

@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "verify:dist": "node scripts/verify-dist.mjs",
     "partner:create": "node scripts/partner-qr.mjs",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
